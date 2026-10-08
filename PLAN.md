@@ -4,6 +4,9 @@
 > Live status, per-module notes and open issues are in `progress.md`.
 > Revised 2026-10-08 after an external review: scope trimmed (strict split → future work, Streamlit built last), gold set ~30 with more
 > unanswerable questions, small-n reporting rules, stronger training-query filtering, and a staged query generator (§3).
+> Revised again 2026-10-08 before Phase 5: no base-model fallback for the fine-tuned model (§3 Delivery), 2 training questions
+> per chunk with a small trial first (§3 Data), and a gold set that mixes natural and document wording, is scored as both
+> "found" and "fully supported", and locates every gold passage by id, page and quote (§4).
 
 A small, cited RAG over three Indian construction documents of different types, plus a fine-tuned
 retrieval embedder. Scope target: about one day of work. This is an interview demo, not a production system.
@@ -97,9 +100,11 @@ ranks higher. Training is about 50 lines of standard `sentence-transformers` cod
 | A4 | "Wrong" passages used in training really are wrong | Hard negatives never come from the same section or table as the positive (avoids teaching "Clause 10CC part 2 is irrelevant to a Clause 10CC question") |
 | A5 | A gain is real, not luck | Per-question wins/losses (n ≈ 30), fixed random seed, no "improves" claim from a 1–2 question gap |
 
-**Data.** 3–4 questions per chunk from **qwen2.5:3b** (~1,300+ candidates from 448 chunks), filtered: near-duplicates;
+**Data.** 2 questions per chunk from **qwen2.5:3b** (~900 candidates from 448 chunks), filtered: near-duplicates;
 questions that copy a long phrase from the chunk (too easy, teaches string matching); questions whose passage isn't in
-the BM25+dense top 50 (probably a bad question); questions too similar to a gold question (leak guard). Groq is not set up
+the BM25+dense top 50 (probably a bad question); questions too similar to a gold question (leak guard). The run time depends on
+the number of chunks (one LLM call each), not on questions per chunk, so 2 is enough. A **small trial (~30 chunks)** is read
+first (the A2 checkpoint); the full run (~30–45 min) then goes in the background. Groq is not set up
 now; it is considered only if the A2 checkpoint fails or the fine-tune shows no gain. If both runs happen, both are reported.
 
 **Hard negatives (kept simple):** for each question, 1 passage from the BM25 top 10 that is *not* from the positive's
@@ -119,17 +124,28 @@ and hybrid. The fine-tuned model **ships only if** it has more per-question wins
 MRR) **and** breaks no amendment-sensitive question. Otherwise the base model ships, and the result is reported honestly.
 The low-confidence threshold is recalibrated for whichever model ships, because fine-tuning changes the similarity scale.
 
-**Delivery:** the fine-tuned model goes to a free Hugging Face Hub repo and downloads automatically. If that fails, the app uses the base model.
+**Delivery:** the fine-tuned model goes to a free Hugging Face Hub repo and downloads automatically. The committed index is rebuilt with
+whichever model ships (`python -m src.index --model ...`); `index_meta.json` records that model and the app loads it, so the vectors
+and the model always match. There is **no fallback to the base model** (its vectors would not match the index): if the download
+fails, the app stops with a clear message. For the base-vs-fine-tuned comparison, the eval embeds the chunks with each model in
+memory (~30 s each), so no second index file is stored.
 
 ## 4. Evaluation
 
-**Gold set** (`eval/gold.jsonl`, about 30 questions, drafted by Claude and **each verified by hand against the PDF page**):
+**Gold set** (`eval/gold.jsonl`, 33 questions, drafted by Claude and **each verified by hand against the PDF page** using a
+checking sheet, `eval/gold_review.md`, that shows the expected answer, the PDF page and a verbatim quote):
 about 7 per document, a few amendment-sensitive (Table 28 φ=0.2, Cl. 5.5), 2–3 cross-document (e.g. CPWD 10CA/10CC
 escalation vs the Ssangyong price-adjustment dispute; **the first to cut**), and **6–8 unanswerable** (enough to set
-the low-confidence threshold, which is otherwise only a rough heuristic). Each record: `question, gold_chunk_ids, answer_key, type, doc`.
+the low-confidence threshold, which is otherwise only a rough heuristic). Each record: `id, question, doc, type, wording, answer,
+must_include, evidence[], note`. **Wording is mixed and tagged:** `natural` (how an engineer or lawyer would ask) and `document`
+(the text's own words), reported separately, because the fine-tune should help mostly on natural wording. **Evidence** locates each
+gold passage three ways (chunk id, section + PDF page, verbatim quote); `eval/gold.py` validates this against `chunks.jsonl` and a
+test fails if a rebuild breaks a gold reference. Once frozen, chunking is not changed.
 Synthetic training queries are **never** used for evaluation. **The gold set is frozen before any fine-tuning run.**
 
-**Retrieval ablation:** Recall@1/5/10 and MRR, broken down by doc and question type:
+**Retrieval ablation:** Recall@1/5/10 and MRR, broken down by doc, question type and wording. Two hit definitions, both reported:
+**found** (at least one evidence passage retrieved) and **fully supported** (every evidence passage reaches the LLM, e.g. the
+original *and* its amendment):
 
 | Retriever | R@1 | R@5 | MRR |
 |---|---|---|---|
@@ -144,7 +160,8 @@ Synthetic training queries are **never** used for evaluation. **The gold set is 
 (the cited chunk supports the claim), and abstention accuracy. Plus a manual review of about 15 answers.
 **Reporting with a small n (≈30):** counts next to every percentage ("22/30"), and **per-question wins/losses** between
 two systems ("fine-tune fixed 4, broke 1") rather than a claim of "improves" from a 2-point gap. Retrieval quality and
-generation quality are reported separately; the 3B generator is the swappable weak link. Bootstrap CIs are optional.
+generation quality are reported separately; the 3B generator is the swappable weak link, and its known limits (wide-table cells,
+boundary conditions, over-citing) are written up as such. Bootstrap CIs are optional.
 
 ## 5. Repo layout
 
@@ -166,7 +183,8 @@ src/
   ask.py             CLI (--debug prints BM25/dense/RRF rankings)
   ui.py              Streamlit (built last)
 finetune/            make_pairs.py, train.py
-eval/                gold.jsonl, run.py, report.md, compare_chunking.py (before/after check for the chunking fix)
+eval/                gold.jsonl, gold.py (loader + validator + checking sheet), gold_review.md, run.py, report.md,
+                     compare_chunking.py (before/after check for the chunking fix)
 artifacts/           chunks.jsonl, embeddings.npy, index_meta.json  (prebuilt, committed)
 requirements.txt          runtime, CPU torch
 requirements-train.txt    training, CUDA torch

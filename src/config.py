@@ -23,6 +23,10 @@ CHUNKS_PATH = ARTIFACTS_DIR / "chunks.jsonl"
 EMBEDDINGS_PATH = ARTIFACTS_DIR / "embeddings.npy"
 INDEX_META_PATH = ARTIFACTS_DIR / "index_meta.json"
 
+EVAL_DIR = PROJECT_ROOT / "eval"
+GOLD_PATH = EVAL_DIR / "gold.jsonl"                # Hand-verified evaluation questions.
+GOLD_REVIEW_PATH = EVAL_DIR / "gold_review.md"     # Checking sheet rendered from GOLD_PATH.
+
 # --- Chunking ----------------------------------------------------------------
 # Chunks are sized in the embedder's own tokens, not words: tables, numbers and
 # OCR noise cost up to ~3 tokens per word ("0.85" -> "0" "." "85"), so a word
