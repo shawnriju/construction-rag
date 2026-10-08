@@ -174,7 +174,8 @@ original *and* its amendment):
 **Generation:** answer correctness (exact match on numeric questions, manual check otherwise), citation correctness
 (the cited chunk supports the claim), and abstention accuracy. Plus a manual review of about 15 answers.
 *Base result (2026-10-08, qwen2.5:3b):* 15/26 answerable right, 7/7 unanswerable correctly "not found"; of 11 failures,
-9 are the generator (the evidence was in its context) and 2 are retrieval. To be re-run with the shipped embedder.
+9 are the generator (the evidence was in its context) and 2 are retrieval. *With the shipped embedder:* also 22/33 (16/26
+answerable, 6/7 unanswerable): fixed 1, broke 1 (an invented answer for an out-of-corpus question, flagged by the low-confidence warning).
 **Reporting with a small n (≈30):** counts next to every percentage ("22/30"), and **per-question wins/losses** between
 two systems ("fine-tune fixed 4, broke 1") rather than a claim of "improves" from a 2-point gap. Retrieval quality and
 generation quality are reported separately; the 3B generator is the swappable weak link, and its known limits (wide-table cells,
@@ -233,7 +234,7 @@ As built, steps 1–3 were done together (all three parsers + curated content be
 4. Dense + RRF + `--debug`; Ollama generation + citation validator + retrieval-only fallback.
 5. Gold set drafted, verified by you, baselines run. ✅
 6. Synthetic pairs (qwen first; Groq if needed, see §3) → fine-tune → transductive protocol → ablation table. ✅ (qwen passed
-   the checkpoint; Groq not needed). HF Hub upload and index switch done. Remaining: answer re-eval.
+   the checkpoint; Groq not needed). HF Hub upload, index switch and answer re-eval done.
 7. Streamlit UI.
 8. README, DECISIONS.md (incl. an "expected failure modes" section and why the Hindi documents were skipped), HF Hub upload, clean-machine test.
 Future work (DECISIONS.md): strict hold-out split for the fine-tune.
