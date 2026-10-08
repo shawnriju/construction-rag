@@ -4,8 +4,12 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from functools import lru_cache
 
-from src.config import MAX_CHUNK_WORDS
+from huggingface_hub import hf_hub_download
+from tokenizers import Tokenizer
+
+from src.config import EMBED_TOKENIZER, MAX_CHUNK_TOKENS, MIN_TAIL_TOKENS
 
 # --- Cleaning ----------------------------------------------------------------
 
@@ -67,6 +71,30 @@ def word_count(text: str) -> int:
     return len(text.split())
 
 
+@lru_cache(maxsize=1)
+def _tokenizer() -> Tokenizer:
+    """The embedder's tokenizer (tokenizer.json only, no model weights).
+
+    The local cache is tried first: a cached copy needs no network call, and
+    on a restricted network the online check can hang instead of failing.
+    """
+    try:
+        path = hf_hub_download(EMBED_TOKENIZER, "tokenizer.json", local_files_only=True)
+    except Exception:  # Not cached yet: fresh machine.
+        path = hf_hub_download(EMBED_TOKENIZER, "tokenizer.json")
+    return Tokenizer.from_file(path)
+
+
+@lru_cache(maxsize=None)
+def token_count(text: str) -> int:
+    """Embedder tokens in `text`, without [CLS]/[SEP].
+
+    Counts add up across whitespace joins (the tokenizer splits on whitespace
+    first), so the packers can sum the counts of individual pieces.
+    """
+    return len(_tokenizer().encode(text, add_special_tokens=False).ids)
+
+
 # --- Packing paragraphs into chunks ------------------------------------------
 
 
@@ -79,18 +107,33 @@ class Paragraph:
     printed_page: str
 
 
-MIN_TAIL_WORDS = 40
-
 _SENTENCE_END = re.compile(r"(?<=[.;:])\s+(?=[A-Z(\"'])")
 
 
-def _split_long(paragraph: Paragraph, max_words: int) -> list[Paragraph]:
+def _hard_split(text: str, max_tokens: int) -> list[str]:
+    """Split at word boundaries into pieces of at most `max_tokens` (last resort)."""
+    pieces: list[str] = []
+    current: list[str] = []
+    current_tokens = 0
+    for word in text.split():
+        tokens = token_count(word)
+        if current and current_tokens + tokens > max_tokens:
+            pieces.append(" ".join(current))
+            current, current_tokens = [], 0
+        current.append(word)
+        current_tokens += tokens
+    if current:
+        pieces.append(" ".join(current))
+    return pieces
+
+
+def _split_long(paragraph: Paragraph, max_tokens: int) -> list[Paragraph]:
     """Split an over-long paragraph at sentence boundaries (hard-split as a last resort)."""
     pieces: list[str] = []
     current = ""
     for sentence in _SENTENCE_END.split(paragraph.text):
         candidate = f"{current} {sentence}".strip()
-        if current and word_count(candidate) > max_words:
+        if current and token_count(candidate) > max_tokens:
             pieces.append(current)
             current = sentence
         else:
@@ -100,34 +143,35 @@ def _split_long(paragraph: Paragraph, max_words: int) -> list[Paragraph]:
 
     final: list[str] = []
     for piece in pieces:  # A single giant "sentence" (e.g. a formula dump) still gets split.
-        words = piece.split()
-        final.extend(" ".join(words[i:i + max_words]) for i in range(0, len(words), max_words))
+        final.extend(_hard_split(piece, max_tokens))
     return [Paragraph(p, paragraph.pdf_page, paragraph.printed_page) for p in final]
 
 
-def pack(paragraphs: list[Paragraph], max_words: int = MAX_CHUNK_WORDS) -> list[list[Paragraph]]:
-    """Greedily group consecutive paragraphs into windows of at most `max_words`.
+def pack(paragraphs: list[Paragraph], max_tokens: int = MAX_CHUNK_TOKENS) -> list[list[Paragraph]]:
+    """Greedily group consecutive paragraphs into windows of at most `max_tokens`.
 
     Paragraph boundaries are respected; only a single paragraph that is longer
-    than `max_words` on its own is split (at sentence boundaries).
+    than `max_tokens` on its own is split (at sentence boundaries).
     """
     windows: list[list[Paragraph]] = []
     current: list[Paragraph] = []
-    current_words = 0
+    current_tokens = 0
     for paragraph in paragraphs:
-        for piece in _split_long(paragraph, max_words) if word_count(paragraph.text) > max_words else [paragraph]:
-            words = word_count(piece.text)
-            if current and current_words + words > max_words:
+        too_long = token_count(paragraph.text) > max_tokens
+        for piece in _split_long(paragraph, max_tokens) if too_long else [paragraph]:
+            tokens = token_count(piece.text)
+            if current and current_tokens + tokens > max_tokens:
                 windows.append(current)
-                current, current_words = [], 0
+                current, current_tokens = [], 0
             current.append(piece)
-            current_words += words
+            current_tokens += tokens
     if current:
         windows.append(current)
 
     # A tiny trailing window ("...this judgment.") is useless on its own; fold it
-    # into the previous one. The slight overflow still fits the embedder window.
-    if len(windows) > 1 and sum(word_count(p.text) for p in windows[-1]) < MIN_TAIL_WORDS:
+    # into the previous one. The overflow is at most MIN_TAIL_TOKENS, which the
+    # breadcrumb reserve and the 512-token check in build.py leave room for.
+    if len(windows) > 1 and sum(token_count(p.text) for p in windows[-1]) < MIN_TAIL_TOKENS:
         windows[-2].extend(windows.pop())
     return windows
 
@@ -155,8 +199,8 @@ class Unit:
     mergeable: bool = True
 
     @property
-    def words(self) -> int:
-        return sum(word_count(p.text) for p in self.paragraphs)
+    def tokens(self) -> int:
+        return sum(token_count(p.text) for p in self.paragraphs)
 
 
 @dataclass
@@ -176,11 +220,11 @@ class Window:
         return f"{name} (part {self.part_no}/{self.part_count})" if self.part_count > 1 else name
 
 
-def group_units(units: list[Unit], max_words: int = MAX_CHUNK_WORDS) -> list[Window]:
+def group_units(units: list[Unit], max_tokens: int = MAX_CHUNK_TOKENS) -> list[Window]:
     """Merge consecutive small units (same group) into windows; split oversized units.
 
     Units are never cut in the middle unless a single unit alone exceeds
-    `max_words`, in which case it becomes several "part i/n" windows.
+    `max_tokens`, in which case it becomes several "part i/n" windows.
     """
     windows: list[Window] = []
     batch: list[Unit] = []
@@ -194,15 +238,15 @@ def group_units(units: list[Unit], max_words: int = MAX_CHUNK_WORDS) -> list[Win
     for unit in units:
         if not unit.paragraphs:
             continue
-        if unit.words > max_words:
+        if unit.tokens > max_tokens:
             # A heading-only stub just before a long unit ("7. DYNAMIC EFFECTS")
             # is folded into the long unit's first part instead of standing alone.
             stub: list[Unit] = []
-            if batch and batch[0].group == unit.group and sum(u.words for u in batch) < MIN_TAIL_WORDS:
+            if batch and batch[0].group == unit.group and sum(u.tokens for u in batch) < MIN_TAIL_TOKENS:
                 stub = batch[:]
                 batch.clear()
             flush()
-            parts = pack(unit.paragraphs, max_words)
+            parts = pack(unit.paragraphs, max_tokens)
             for i, part in enumerate(parts, start=1):
                 keys = [u.key for u in stub] + [unit.key] if i == 1 else [unit.key]
                 lead = [p for u in stub for p in u.paragraphs] if i == 1 else []
@@ -214,7 +258,7 @@ def group_units(units: list[Unit], max_words: int = MAX_CHUNK_WORDS) -> list[Win
             and unit.mergeable
             and batch[-1].mergeable
             and batch[0].group == unit.group
-            and sum(u.words for u in batch) + unit.words <= max_words
+            and sum(u.tokens for u in batch) + unit.tokens <= max_tokens
         )
         if not can_join:
             flush()

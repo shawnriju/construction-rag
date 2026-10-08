@@ -24,9 +24,16 @@ EMBEDDINGS_PATH = ARTIFACTS_DIR / "embeddings.npy"
 INDEX_META_PATH = ARTIFACTS_DIR / "index_meta.json"
 
 # --- Chunking ----------------------------------------------------------------
-# bge-small has a 512-token limit. Roughly 1.3 tokens per English word, so 300
-# words keeps a chunk plus its breadcrumb safely inside that window.
-MAX_CHUNK_WORDS = 300
+# Chunks are sized in the embedder's own tokens, not words: tables, numbers and
+# OCR noise cost up to ~3 tokens per word ("0.85" -> "0" "." "85"), so a word
+# limit let some chunks overflow the window and lose their tail silently.
+EMBED_TOKENIZER = "BAAI/bge-small-en-v1.5"  # A fine-tuned bge-small keeps this tokenizer.
+EMBED_MAX_TOKENS = 512        # bge-small's window, incl. the [CLS]/[SEP] tokens.
+BREADCRUMB_TOKEN_RESERVE = 64  # The longest breadcrumb is ~60 tokens.
+# Budget for a chunk's body. 400 matches what 300 words of prose already were
+# (~370-420 tokens), so prose chunking barely changes; dense tables now split.
+MAX_CHUNK_TOKENS = 400
+MIN_TAIL_TOKENS = 50  # A smaller trailing piece is folded into the previous chunk.
 
 # --- Models ------------------------------------------------------------------
 BASE_EMBED_MODEL = "BAAI/bge-small-en-v1.5"
@@ -40,6 +47,9 @@ RRF_K = 60            # Standard constant for reciprocal rank fusion.
 CANDIDATES_PER_RETRIEVER = 30
 TOP_K = 6             # Chunks passed to the LLM.
 MAX_ATTACHED = 4      # Extra chunks added by amendment expansion.
+# Extra chunks added by sibling expansion (the other parts of a split curated
+# table). Separate budget, so table parts never crowd out an amendment.
+MAX_SIBLINGS_ATTACHED = 3
 # Below this cosine similarity of the best dense hit, results are flagged as
 # low-confidence. Provisional value; calibrated on the gold set's unanswerable questions.
 LOW_CONFIDENCE_COSINE = 0.55

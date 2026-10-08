@@ -19,6 +19,8 @@
 #   covers        provision ids contained in the entry (for amendment lookup)
 #   amends        (amendments only) provision ids the amendment modifies; [] = global
 #   text          the content (markdown)
+#   header/parts/footer  instead of `text`, for a table too long for the embedder's
+#                 512-token window: one chunk per part, each = header + part + footer
 
 tables:
   - section: Table 1
@@ -63,33 +65,45 @@ tables:
       | 50 m/s | 88.8 | 22.8 |
       | 55 m/s | 90.8 | 27.3 |
 
+  # Table 2 is ~1000 embedder tokens, about twice the 512-token window, so it is
+  # split by height into parts. Each part repeats the header (caption + column
+  # headings) and footer (notes) so it reads on its own. The rows are unchanged.
   - section: Table 2
     title: k2 factors to obtain design wind speed variation with height in different terrains for different classes of buildings/structures
     part: "5.3 Design Wind Speed"
     pdf_pages: [16]
     printed_pages: ["12"]
     covers: [Table 2]
-    text: |
+    header: |
       Table 2 (clause 5.3.2.2): multiplying factor k2 by which the basic wind speed Vb is multiplied to get the design wind speed at height z, for terrain categories 1-4 and building classes A, B, C.
       Class A: structure/component max dimension < 20 m. Class B: 20-50 m. Class C: > 50 m.
 
       | Height (m) | Cat 1 A | Cat 1 B | Cat 1 C | Cat 2 A | Cat 2 B | Cat 2 C | Cat 3 A | Cat 3 B | Cat 3 C | Cat 4 A | Cat 4 B | Cat 4 C |
       |---|---|---|---|---|---|---|---|---|---|---|---|---|
-      | 10  | 1.05 | 1.03 | 0.99 | 1.00 | 0.98 | 0.93 | 0.91 | 0.88 | 0.82 | 0.80 | 0.76 | 0.67 |
-      | 15  | 1.09 | 1.07 | 1.03 | 1.05 | 1.02 | 0.97 | 0.97 | 0.94 | 0.87 | 0.80 | 0.76 | 0.67 |
-      | 20  | 1.12 | 1.10 | 1.06 | 1.07 | 1.05 | 1.00 | 1.01 | 0.98 | 0.91 | 0.80 | 0.76 | 0.67 |
-      | 30  | 1.15 | 1.13 | 1.09 | 1.12 | 1.10 | 1.04 | 1.06 | 1.03 | 0.96 | 0.97 | 0.93 | 0.83 |
-      | 50  | 1.20 | 1.18 | 1.14 | 1.17 | 1.15 | 1.10 | 1.12 | 1.09 | 1.02 | 1.10 | 1.05 | 0.95 |
-      | 100 | 1.26 | 1.24 | 1.20 | 1.24 | 1.22 | 1.17 | 1.20 | 1.17 | 1.10 | 1.20 | 1.15 | 1.05 |
-      | 150 | 1.30 | 1.28 | 1.24 | 1.28 | 1.25 | 1.21 | 1.24 | 1.21 | 1.15 | 1.24 | 1.20 | 1.10 |
-      | 200 | 1.32 | 1.30 | 1.26 | 1.30 | 1.28 | 1.24 | 1.27 | 1.24 | 1.18 | 1.27 | 1.22 | 1.13 |
-      | 250 | 1.34 | 1.32 | 1.28 | 1.32 | 1.31 | 1.26 | 1.29 | 1.26 | 1.20 | 1.28 | 1.24 | 1.16 |
-      | 300 | 1.35 | 1.34 | 1.30 | 1.34 | 1.32 | 1.28 | 1.31 | 1.28 | 1.22 | 1.30 | 1.26 | 1.17 |
-      | 350 | 1.37 | 1.35 | 1.31 | 1.36 | 1.34 | 1.29 | 1.32 | 1.30 | 1.24 | 1.31 | 1.27 | 1.19 |
-      | 400 | 1.38 | 1.36 | 1.32 | 1.37 | 1.35 | 1.30 | 1.34 | 1.31 | 1.25 | 1.32 | 1.28 | 1.20 |
-      | 450 | 1.39 | 1.37 | 1.33 | 1.38 | 1.36 | 1.31 | 1.35 | 1.32 | 1.26 | 1.33 | 1.29 | 1.21 |
-      | 500 | 1.40 | 1.38 | 1.34 | 1.39 | 1.37 | 1.32 | 1.36 | 1.33 | 1.28 | 1.34 | 1.30 | 1.22 |
-
+    parts:
+      - label: heights 10-30 m
+        text: |
+          | 10  | 1.05 | 1.03 | 0.99 | 1.00 | 0.98 | 0.93 | 0.91 | 0.88 | 0.82 | 0.80 | 0.76 | 0.67 |
+          | 15  | 1.09 | 1.07 | 1.03 | 1.05 | 1.02 | 0.97 | 0.97 | 0.94 | 0.87 | 0.80 | 0.76 | 0.67 |
+          | 20  | 1.12 | 1.10 | 1.06 | 1.07 | 1.05 | 1.00 | 1.01 | 0.98 | 0.91 | 0.80 | 0.76 | 0.67 |
+          | 30  | 1.15 | 1.13 | 1.09 | 1.12 | 1.10 | 1.04 | 1.06 | 1.03 | 0.96 | 0.97 | 0.93 | 0.83 |
+      - label: heights 50-200 m
+        text: |
+          | 50  | 1.20 | 1.18 | 1.14 | 1.17 | 1.15 | 1.10 | 1.12 | 1.09 | 1.02 | 1.10 | 1.05 | 0.95 |
+          | 100 | 1.26 | 1.24 | 1.20 | 1.24 | 1.22 | 1.17 | 1.20 | 1.17 | 1.10 | 1.20 | 1.15 | 1.05 |
+          | 150 | 1.30 | 1.28 | 1.24 | 1.28 | 1.25 | 1.21 | 1.24 | 1.21 | 1.15 | 1.24 | 1.20 | 1.10 |
+          | 200 | 1.32 | 1.30 | 1.26 | 1.30 | 1.28 | 1.24 | 1.27 | 1.24 | 1.18 | 1.27 | 1.22 | 1.13 |
+      - label: heights 250-350 m
+        text: |
+          | 250 | 1.34 | 1.32 | 1.28 | 1.32 | 1.31 | 1.26 | 1.29 | 1.26 | 1.20 | 1.28 | 1.24 | 1.16 |
+          | 300 | 1.35 | 1.34 | 1.30 | 1.34 | 1.32 | 1.28 | 1.31 | 1.28 | 1.22 | 1.30 | 1.26 | 1.17 |
+          | 350 | 1.37 | 1.35 | 1.31 | 1.36 | 1.34 | 1.29 | 1.32 | 1.30 | 1.24 | 1.31 | 1.27 | 1.19 |
+      - label: heights 400-500 m
+        text: |
+          | 400 | 1.38 | 1.36 | 1.32 | 1.37 | 1.35 | 1.30 | 1.34 | 1.31 | 1.25 | 1.32 | 1.28 | 1.20 |
+          | 450 | 1.39 | 1.37 | 1.33 | 1.38 | 1.36 | 1.31 | 1.35 | 1.32 | 1.26 | 1.33 | 1.29 | 1.21 |
+          | 500 | 1.40 | 1.38 | 1.34 | 1.39 | 1.37 | 1.32 | 1.36 | 1.33 | 1.28 | 1.34 | 1.30 | 1.22 |
+    footer: |
       NOTE 1 - See 5.3.2.2 for definitions of Class A, Class B and Class C structures.
       NOTE 2 - Intermediate values may be obtained by linear interpolation, if desired. It is permissible to assume constant wind speed between 2 heights for simplicity.
 
@@ -120,11 +134,19 @@ tables:
     pdf_pages: [57]
     printed_pages: ["53"]
     covers: [Appendix A]
-    text: |
+    # Split alphabetically (526 tokens > 512). Each part's curator note lists
+    # only the renamed cities in that part, so "Chennai" retrieves the right one.
+    header: |
       Appendix A (clause 5.2): basic wind speed Vb (m/s) at 10 m height, 50-year return period.
-      Agra 47; Ahmadabad 39; Ajmer 47; Almora 47; Amritsar 47; Asansol 47; Aurangabad 39; Bahraich 47; Bangalore 33; Barauni 47; Bareilly 47; Bhatinda 47; Bhilai 39; Bhopal 39; Bhubaneshwar 50; Bhuj 50; Bikaner 47; Bokaro 47; Bombay 44; Calcutta 50; Calicut 39; Chandigarh 47; Coimbatore 39; Cuttack 50; Darbhanga 55; Darjeeling 47; Dehra Dun 47; Delhi 47; Durgapur 47; Gangtok 47; Gauhati 50; Gaya 39; Gorakhpur 47; Hyderabad 44; Imphal 47; Jabalpur 47; Jaipur 47; Jamshedpur 47;
-      Jhansi 47; Jodhpur 47; Kanpur 47; Kohima 44; Kurnool 39; Lakshadweep 39; Lucknow 47; Ludhiana 47; Madras 50; Madurai 39; Mandi 39; Mangalore 39; Moradabad 47; Mysore 33; Nagpur 44; Nainital 47; Nasik 39; Nellore 50; Panjim 39; Patiala 47; Patna 47; Pondicherry 50; Port Blair 44; Pune 39; Raipur 39; Rajkot 39; Ranchi 39; Roorkee 39; Rourkela 39; Simla 39; Srinagar 39; Surat 44; Tiruchchirrappalli 47; Trivandrum 39; Udaipur 47; Vadodara 44; Varanasi 47; Vijaywada 50; Visakhapatnam 50.
-      [Curator note, not part of the standard: the 1987 names correspond to today's Mumbai (Bombay), Kolkata (Calcutta), Chennai (Madras), Bengaluru (Bangalore), Guwahati (Gauhati), Shimla (Simla), Thiruvananthapuram (Trivandrum), Vijayawada (Vijaywada), Kozhikode (Calicut), Puducherry (Pondicherry), Panaji (Panjim), Bathinda (Bhatinda).]
+    parts:
+      - label: Agra to Jamshedpur
+        text: |
+          Agra 47; Ahmadabad 39; Ajmer 47; Almora 47; Amritsar 47; Asansol 47; Aurangabad 39; Bahraich 47; Bangalore 33; Barauni 47; Bareilly 47; Bhatinda 47; Bhilai 39; Bhopal 39; Bhubaneshwar 50; Bhuj 50; Bikaner 47; Bokaro 47; Bombay 44; Calcutta 50; Calicut 39; Chandigarh 47; Coimbatore 39; Cuttack 50; Darbhanga 55; Darjeeling 47; Dehra Dun 47; Delhi 47; Durgapur 47; Gangtok 47; Gauhati 50; Gaya 39; Gorakhpur 47; Hyderabad 44; Imphal 47; Jabalpur 47; Jaipur 47; Jamshedpur 47;
+          [Curator note, not part of the standard: the 1987 names correspond to today's Mumbai (Bombay), Kolkata (Calcutta), Bengaluru (Bangalore), Guwahati (Gauhati), Kozhikode (Calicut), Bathinda (Bhatinda).]
+      - label: Jhansi to Visakhapatnam
+        text: |
+          Jhansi 47; Jodhpur 47; Kanpur 47; Kohima 44; Kurnool 39; Lakshadweep 39; Lucknow 47; Ludhiana 47; Madras 50; Madurai 39; Mandi 39; Mangalore 39; Moradabad 47; Mysore 33; Nagpur 44; Nainital 47; Nasik 39; Nellore 50; Panjim 39; Patiala 47; Patna 47; Pondicherry 50; Port Blair 44; Pune 39; Raipur 39; Rajkot 39; Ranchi 39; Roorkee 39; Rourkela 39; Simla 39; Srinagar 39; Surat 44; Tiruchchirrappalli 47; Trivandrum 39; Udaipur 47; Vadodara 44; Varanasi 47; Vijaywada 50; Visakhapatnam 50.
+          [Curator note, not part of the standard: the 1987 names correspond to today's Chennai (Madras), Shimla (Simla), Thiruvananthapuram (Trivandrum), Vijayawada (Vijaywada), Puducherry (Pondicherry), Panaji (Panjim).]
 
 amendments:
   - number: 1

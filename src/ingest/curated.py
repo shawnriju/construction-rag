@@ -24,20 +24,41 @@ def _slug(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
 
 
-def _table_chunk(entry: dict) -> Chunk:
+def _table_chunk(entry: dict, section: str, title: str, text: str, parent: str = "") -> Chunk:
     return Chunk(
-        chunk_id=f"{DOC_ID}:curated:{_slug(entry['section'])}",
+        chunk_id=f"{DOC_ID}:curated:{_slug(section)}",
         doc_id=DOC_ID,
         doc_title=DOC_TITLE,
         part=entry.get("part", ""),
-        section=entry["section"],
-        title=entry["title"],
-        text=entry["text"].strip(),
+        section=section,
+        title=title,
+        text=text.strip(),
         pdf_pages=entry["pdf_pages"],
         printed_pages=entry["printed_pages"],
         covers=entry.get("covers", [entry["section"]]),
         source="curated",
+        parent=parent,
     )
+
+
+def _table_chunks(entry: dict) -> list[Chunk]:
+    """One chunk per table, or one per part for a table too long for the embedder.
+
+    A split table repeats its `header` (caption + column headings) and `footer`
+    (notes) in every part, so each part can be read and cited on its own.
+    All parts keep `covers` = the whole table, so amendments still attach, and
+    `parent` = the table's name, so retrieval can attach the missing parts.
+    """
+    if "parts" not in entry:
+        return [_table_chunk(entry, entry["section"], entry["title"], entry["text"])]
+    header, footer, parts = entry["header"].strip(), entry.get("footer", "").strip(), entry["parts"]
+    chunks = []
+    for i, part in enumerate(parts, start=1):
+        text = "\n\n".join(t for t in (header, part["text"].strip(), footer) if t)
+        section = f"{entry['section']} (part {i}/{len(parts)})"
+        title = f"{entry['title']} ({part['label']})"
+        chunks.append(_table_chunk(entry, section, title, text, parent=entry["section"]))
+    return chunks
 
 
 def _amendment_chunks(amendment: dict) -> list[Chunk]:
@@ -67,7 +88,7 @@ def _amendment_chunks(amendment: dict) -> list[Chunk]:
 def load(curated_dir: Path) -> list[Chunk]:
     with (curated_dir / CURATED_FILE).open(encoding="utf-8") as f:
         data = yaml.safe_load(f)
-    chunks = [_table_chunk(entry) for entry in data["tables"]]
+    chunks = [chunk for entry in data["tables"] for chunk in _table_chunks(entry)]
     for amendment in data["amendments"]:
         chunks.extend(_amendment_chunks(amendment))
     return chunks

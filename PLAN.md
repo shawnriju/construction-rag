@@ -1,4 +1,7 @@
-# Construction RAG — Frozen Plan
+# Construction RAG — Plan
+
+> The design agreed before building. Where the build differed, this file has been updated to match.
+> Live status, per-module notes and open issues are in `progress.md`.
 
 A small, cited RAG over three Indian construction documents of different types, plus a fine-tuned
 retrieval embedder. Scope target: about one day of work. This is an interview demo, not a production system.
@@ -8,8 +11,8 @@ retrieval embedder. Scope target: about one day of work. This is an interview de
 | Doc | Type | Pages | Extraction reality | Chunk unit | Citation form |
 |---|---|---|---|---|---|
 | CPWD GCC 2020 | Contract | 112 | Text layer with noise: `1234567890…` ruler rows, legacy-font Hindi gibberish, left-margin side headings | Clause / sub-clause (e.g. 10CC, 25) | `CPWD GCC 2020, Clause 10CC, p.28 (PDF 30)` |
-| Ssangyong v NHAI (SC, 2019) | Judgment | 90 | Clean text with numbered paragraphs | Groups of paragraphs, ~300–400 tokens, never split mid-¶ | `Ssangyong v NHAI, ¶48, p.88` |
-| IS 875 (Part 3):1987 | Standard | 67 | Scan with an OCR layer; tables are unusable; **Amendments 1–3 appended** | Clause (5.3.2.1 …) + 3 curated tables | `IS 875-3, Cl. 5.3.2.2 / Table 2, p.12` |
+| Ssangyong v NHAI (SC, 2019) | Judgment | 90 | Clean text with numbered paragraphs | Groups of paragraphs up to ~400 embedder tokens; a long ¶ is split into "part i/n" | `Ssangyong v NHAI, ¶48, p.88` |
+| IS 875 (Part 3):1987 | Standard | 67 | Scan with an OCR layer; tables are unusable; **Amendments 1–3 appended** | Clause (5.3.2.1 …) + 4 curated tables | `IS 875-3, Cl. 5.3.2.2 / Table 2, p.12` |
 
 Every citation carries both the **PDF page** and the **printed page** (they differ in all three docs).
 
@@ -20,8 +23,15 @@ application **pulls in the amendments that amend it** and labels them as superse
 code, not only in the prompt. The scope of the corpus is stated plainly as "IS 875-3:1987 with Amd 1–3".
 I don't make claims about later revisions unless they are verified.
 
-**Curated tables** (`data/curated_tables/*.md`, `source=curated`): Table 2 (k2), Table 28 (with the Amd 2
-fix applied and noted), and Appendix A (city basic wind speeds).
+**Curated content** (`data/curated/is875.yaml`, `source=curated`): Table 1 (k1, with its Note as a separate
+entry), Table 2 (k2), Table 28, and Appendix A (city basic wind speeds, plus a labelled curator note mapping old
+city names to new ones, e.g. Madras→Chennai). Tables are transcribed **exactly as printed**: Table 28 keeps 1.0,
+and the 1.8 correction exists only in the Amd 2 chunk, so the amendment handling is what produces the right answer.
+All three amendments are curated item by item, because the Amd 3 page has no text layer.
+Table 2 and Appendix A are too long for the embedder's 512-token window, so they are stored as parts
+(Table 2 by height, Appendix A alphabetically), each repeating the caption and column headings. Parts are
+searched one by one, but when any part is retrieved the code attaches the rest (**sibling expansion**,
+"small-to-big"), so the LLM always gets the whole table. This matters for interpolation between rows that sit in different parts.
 
 ## 2. Architecture
 
@@ -31,7 +41,7 @@ PDFs ─ PyMuPDF ─ per-doc cleaner ─ structure-aware chunker ─ chunks.json
                          ┌─────────────────────────┴─────────────┐
                       BM25 (rank_bm25)                  BGE-small embeddings (numpy)
                          └──────────────┬────────────────────────┘
-                                   RRF fusion → amendment expansion → top 6
+                                   RRF fusion → top 6 → sibling expansion → amendment expansion
                                         │
                      prompt with numbered sources [S1..S6], "cite every claim, else say not found"
                                         │
@@ -45,13 +55,14 @@ PDFs ─ PyMuPDF ─ per-doc cleaner ─ structure-aware chunker ─ chunks.json
 | Layer | Choice | Why |
 |---|---|---|
 | Extraction | PyMuPDF | Fast, keeps pages, no system deps |
+| Chunk size | ≤400 tokens of body, measured with bge-small's own tokenizer; the build fails if any chunk + breadcrumb exceeds 512 | Numbers and OCR text cost up to ~3 tokens per word, so a word limit let tables overflow the window and lose their tail silently |
 | Sparse | rank_bm25 | Exact identifiers: "Clause 10CC", "Table 28", "Section 34" |
 | Dense | BAAI/bge-small-en-v1.5 → fine-tuned | 33M params, fast on CPU, cheap to fine-tune |
-| Store | numpy + JSONL behind a `Retriever` interface | ~1–2K chunks needs no vector DB; Qdrant/pgvector is a one-file swap |
+| Store | numpy + JSONL behind a `Retriever` interface | ~450 chunks needs no vector DB; Qdrant/pgvector is a one-file swap |
 | Fusion | Reciprocal Rank Fusion (k=60) | Needs no score calibration |
 | Reranker | **Optional, off by default** | Only if time allows; measured in the ablation |
 | LLM | Ollama qwen2.5:3b-instruct, swapped via env var | Free and local; fits a 4 GB GPU or runs on CPU |
-| Abstention | RRF/dense score threshold, calibrated on unanswerable gold questions | "Not in the provided documents" |
+| Abstention | Best dense cosine below a threshold → low-confidence warning; LLM told to say "Not found in the provided documents."; threshold calibrated on unanswerable gold questions | "Not in the provided documents" |
 | UI | Streamlit + CLI | Answer, source cards (doc, clause/¶, both pages, snippet) |
 
 ## 3. Fine-tuning element: domain-adapted retrieval embedder
@@ -105,18 +116,21 @@ README.md            setup + "ask a question" in ≤5 commands
 PLAN.md              this file
 DECISIONS.md         assumptions, rejected alternatives, failure modes, scale path
 data/pdfs/           the three source PDFs
-data/curated_tables/ hand-curated IS 875 tables (markdown)
+data/curated/        is875.yaml: hand-curated IS 875 tables + amendments
 src/
-  ingest/            extract.py, clean_cpwd.py, chunk_cpwd.py, chunk_ssangyong.py, chunk_is875.py
-  index.py           build BM25 + embeddings → artifacts/
+  config.py          paths, model names, constants (env-var overrides)
+  schema.py          Chunk dataclass + JSONL save/load
+  ingest/            pdf.py, text.py (shared), cpwd.py, ssangyong.py, is875.py, curated.py, build.py
+  index.py           embeddings → artifacts/ (BM25 is rebuilt at load, not persisted)
   retrieve.py        Retriever: bm25, dense, hybrid(RRF), amendment expansion
   generate.py        LLM adapter (ollama | groq | none), prompt
   cite.py            citation validator
+  pipeline.py        retrieve → generate → validate (shared by CLI and UI)
   ask.py             CLI (--debug prints BM25/dense/RRF rankings)
   ui.py              Streamlit
 finetune/            make_pairs.py, train.py
-eval/                gold.jsonl, run.py, report.md
-artifacts/           chunks.jsonl, bm25.pkl, embeddings_*.npy  (prebuilt, committed)
+eval/                gold.jsonl, run.py, report.md, compare_chunking.py (before/after check for the chunking fix)
+artifacts/           chunks.jsonl, embeddings.npy, index_meta.json  (prebuilt, committed)
 requirements.txt          runtime, CPU torch
 requirements-train.txt    training, CUDA torch
 ```
@@ -136,6 +150,8 @@ The prebuilt index is committed, so no re-ingestion is needed. Without Ollama, t
 Before submitting, it is tested in a fresh venv on a clean clone.
 
 ## 7. Build order (vertical slice first)
+
+As built, steps 1–3 were done together (all three parsers + curated content before retrieval); the rest is unchanged.
 
 1. Scaffold, extraction, **CPWD cleaner + chunker** (the riskiest piece), sample chunks reviewed.
 2. BM25 + CLI over CPWD only. This is the first end-to-end answer.

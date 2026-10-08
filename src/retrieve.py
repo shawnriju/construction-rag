@@ -6,8 +6,13 @@ paraphrased questions ("what happens if the contractor is late?") need
 semantic matching. RRF combines the two rankings without having to calibrate
 their very different score scales.
 
-After fusion, amendment expansion makes sure superseding IS 875 amendments
-travel together with the provisions they change.
+After fusion, two expansions add chunks the LLM needs alongside the hits:
+  * sibling expansion ("small-to-big"): a curated table split into parts to
+    fit the embedder is searched part by part, but handed to the LLM whole.
+    Dense embeddings can't tell table rows apart by number, so the part with
+    the asked-for row is often not the part that was found.
+  * amendment expansion: superseding IS 875 amendments travel together with
+    the provisions they change.
 """
 
 from __future__ import annotations
@@ -29,6 +34,7 @@ from src.config import (
     INDEX_META_PATH,
     LOW_CONFIDENCE_COSINE,
     MAX_ATTACHED,
+    MAX_SIBLINGS_ATTACHED,
     RRF_K,
     TOP_K,
 )
@@ -63,7 +69,7 @@ class Hit:
     chunk: Chunk
     score: float                       # RRF score (or raw score in single-retriever modes).
     ranks: dict[str, int] = field(default_factory=dict)  # Retriever name -> 1-based rank.
-    attached_reason: str = ""          # Non-empty if added by amendment expansion.
+    attached_reason: str = ""          # Non-empty if added by sibling or amendment expansion.
 
 
 @dataclass
@@ -89,6 +95,7 @@ class Retriever:
         self.model = model
         self.bm25 = BM25Okapi([tokenize(c.index_text) for c in chunks])
         self._amendments_by_target = self._index_amendments(chunks)
+        self._parts_by_parent = self._index_parts(chunks)
 
     @classmethod
     def load(cls, chunks_path: Path = CHUNKS_PATH) -> "Retriever":
@@ -127,12 +134,20 @@ class Retriever:
         order = sorted(fused, key=fused.get, reverse=True)
         return [(idx, fused[idx], ranks[idx]) for idx in order]
 
-    def search(self, query: str, top_k: int = TOP_K, mode: str = "hybrid", expand: bool = True) -> SearchResult:
+    def search(
+        self,
+        query: str,
+        top_k: int = TOP_K,
+        mode: str = "hybrid",
+        expand: bool = True,
+        siblings: bool = True,
+    ) -> SearchResult:
         """Retrieve the top chunks for a question.
 
         Args:
             mode: "hybrid" (default), "bm25" or "dense" - the latter two exist for the ablation study.
             expand: Attach amendments to the provisions they modify (and vice versa).
+            siblings: Attach the other parts of a split curated table.
         """
         dense = self.dense_ranking(query)
         best_cosine = dense[0][1] if dense else 0.0
@@ -147,9 +162,38 @@ class Retriever:
             raise ValueError(f"Unknown mode: {mode}")
 
         hits = [Hit(self.chunks[i], score, ranks) for i, score, ranks in ranked[:top_k]]
+        if siblings:
+            hits = self._attach_siblings(hits)
         if expand:
             hits = self._expand_amendments(hits)
         return SearchResult(query, hits, best_cosine)
+
+    # -- sibling expansion --
+
+    @staticmethod
+    def _index_parts(chunks: list[Chunk]) -> dict[str, list[Chunk]]:
+        """Split table name ("Table 2") -> its parts, in document order."""
+        index: dict[str, list[Chunk]] = {}
+        for chunk in chunks:
+            if chunk.parent:
+                index.setdefault(chunk.parent, []).append(chunk)
+        return index
+
+    def _attach_siblings(self, hits: list[Hit]) -> list[Hit]:
+        """Insert the missing parts of a split table directly after its first retrieved part."""
+        seen = {h.chunk.chunk_id for h in hits}
+        expanded: list[Hit] = []
+        attached = 0
+        for hit in hits:
+            expanded.append(hit)
+            for part in self._parts_by_parent.get(hit.chunk.parent, []):
+                if part.chunk_id in seen or attached >= MAX_SIBLINGS_ATTACHED:
+                    continue
+                seen.add(part.chunk_id)
+                reason = f"rest of {part.parent}: {hit.chunk.section} was retrieved"
+                expanded.append(Hit(part, 0.0, attached_reason=reason))
+                attached += 1
+        return expanded
 
     # -- amendment expansion --
 

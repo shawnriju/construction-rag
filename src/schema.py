@@ -27,6 +27,9 @@ class Chunk:
         is_amendment: True if this chunk is an amendment to another provision.
         amends: Provision ids this chunk modifies (only for amendments).
         source: "pdf" for extracted text, "curated" for hand-transcribed content.
+        parent: For one part of a curated table that was split to fit the
+            embedder (e.g. "Table 2"): the whole table's name. Retrieval
+            attaches the other parts, so the LLM always sees the full table.
     """
 
     chunk_id: str
@@ -42,6 +45,7 @@ class Chunk:
     is_amendment: bool = False
     amends: list[str] = field(default_factory=list)
     source: str = "pdf"
+    parent: str = ""
 
     @property
     def breadcrumb(self) -> str:
