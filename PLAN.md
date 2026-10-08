@@ -7,7 +7,9 @@
 > Revised again 2026-10-08 before Phase 5: no base-model fallback for the fine-tuned model (§3 Delivery), 2 training questions
 > per chunk with a small trial first (§3 Data), and a gold set that mixes natural and document wording, is scored as both
 > "found" and "fully supported", and locates every gold passage by id, page and quote (§4).
-> Status 2026-10-08: steps 1-6 of §7 built and measured (results in eval/results/ and progress.md §11);
+> Status 2026-10-09: all steps of §7 done. README.md, DECISIONS.md and a basic Streamlit page (`src/ui.py`) added; the clean-machine
+> test passed on another person's machine, with and without Ollama.
+> Earlier status (2026-10-08): steps 1-6 of §7 built and measured (results in eval/results/ and progress.md §11);
 > the fine-tuned embedder won under the pre-committed rule and ships via the Hugging Face Hub (user decision):
 > `shawnriju/bge-small-construction-rag`, committed index rebuilt with it, low-confidence cutoff 0.51.
 
@@ -235,8 +237,8 @@ As built, steps 1–3 were done together (all three parsers + curated content be
 5. Gold set drafted, verified by you, baselines run. ✅
 6. Synthetic pairs (qwen first; Groq if needed, see §3) → fine-tune → transductive protocol → ablation table. ✅ (qwen passed
    the checkpoint; Groq not needed). HF Hub upload, index switch and answer re-eval done.
-7. Streamlit UI.
-8. README, DECISIONS.md (incl. an "expected failure modes" section and why the Hindi documents were skipped), HF Hub upload, clean-machine test.
+7. Streamlit UI. ✅ (basic: same answer, warnings and sources as the CLI; polish cut as planned)
+8. README, DECISIONS.md (incl. an "expected failure modes" section and why the Hindi documents were skipped), HF Hub upload, clean-machine test. ✅
 Future work (DECISIONS.md): strict hold-out split for the fine-tune.
 
 **If time runs short, cut in this order:** reranker → cross-document gold questions → Streamlit polish (a basic UI stays).

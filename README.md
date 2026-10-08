@@ -175,7 +175,23 @@ How to read it:
 - `[curated]` means the content was typed in by hand from the PDF, because the scanned table couldn't be read reliably.
 - Any warnings (for example "low retrieval confidence") appear between the answer and the sources. Take them seriously.
 
-### More ways to ask
+### Or use the web page
+
+The same system, in your browser. With the virtual environment on:
+
+**Windows, macOS and Linux** (same command):
+```
+streamlit run src/ui.py
+```
+
+- The very first time, Streamlit may ask for an email address in the terminal. It's optional: just press **Enter**.
+- Your browser opens the page automatically. If it doesn't, open http://localhost:8501 yourself.
+- Type a question and click **Ask**, or click one of the example questions on the left.
+- The answer appears with its sources below it. Sources cited in the answer are marked ★ and open automatically; click any other source to read it.
+- On the left you can also turn off answer writing (search results only), choose the kind of search, and show ranking details.
+- To stop the web page, go back to the terminal and press **Ctrl+C** (also on macOS).
+
+### More ways to ask (command line)
 
 These commands are **the same on Windows, macOS and Linux**:
 
@@ -326,7 +342,7 @@ The fine-tuning scripts (`finetune/`) need an NVIDIA GPU with CUDA and a separat
 ```
 data/pdfs/        the three source PDFs
 data/curated/     hand-typed IS 875 tables and amendments, plus today's city names
-src/              the app: PDF reading (ingest/), search, answer writing, citation checks, CLI
+src/              the app: PDF reading (ingest/), search, answer writing, citation checks, CLI (ask.py), web page (ui.py)
 artifacts/        the ready-made passages and search index
 finetune/         practice-question generation and training scripts
 eval/             the 33 hand-checked questions, scoring code, and results
@@ -367,7 +383,7 @@ Then turn it on and run Step 3 again.
 **"Could not load the embedding model ..." when you ask the first question.**
 The search model couldn't download. Check your internet connection and try again. It only needs to download once.
 
-**You see "LLM backend 'ollama' is not reachable; showing retrieved passages only."**
+**You see "LLM backend 'ollama:qwen2.5:3b-instruct' is not reachable; showing retrieved passages only." (or, on the web page, "Ollama isn't running, or its model isn't downloaded").**
 Ollama isn't running, or the model isn't downloaded.
 - Windows / macOS: open the Ollama app (from the Start menu or Applications).
 - Linux: start it with `ollama serve` in a second terminal (or `sudo systemctl start ollama`).
