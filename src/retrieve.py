@@ -6,7 +6,12 @@ paraphrased questions ("what happens if the contractor is late?") need
 semantic matching. RRF combines the two rankings without having to calibrate
 their very different score scales.
 
-After fusion, two expansions add chunks the LLM needs alongside the hits:
+After fusion, rare identifiers named in the question are pinned: "Article 142"
+occurs in a single chunk, but a paraphrased question ("What relief did the court
+grant under Article 142?") can push that chunk out of the top k because dense
+search misses it. A chunk holding a rare identifier the user typed is included.
+
+Then two expansions add chunks the LLM needs alongside the hits:
   * sibling expansion ("small-to-big"): a curated table split into parts to
     fit the embedder is searched part by part, but handed to the LLM whole.
     Dense embeddings can't tell table rows apart by number, so the part with
@@ -19,6 +24,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -34,7 +40,9 @@ from src.config import (
     INDEX_META_PATH,
     LOW_CONFIDENCE_COSINE,
     MAX_ATTACHED,
+    MAX_PINNED,
     MAX_SIBLINGS_ATTACHED,
+    RARE_IDENTIFIER_MAX_CHUNKS,
     RRF_K,
     TOP_K,
 )
@@ -51,11 +59,19 @@ _STOPWORDS = frozenset(
 # Keeps clause ids intact: "10cc", "6.2.2.8", "34", "c-2.1".
 _TOKEN = re.compile(r"[a-z]-\d+(?:\.\d+)*|\d+(?:\.\d+)*[a-z]{0,2}|[a-z]+")
 _SPACED_CLAUSE_ID = re.compile(r"\b(\d+)\s+([a-z]{1,2})\b(?=\s|$|[),.;:])")
+# Short English words that follow numbers ("Section 34 of", "Article 142 in", "Tables 2 to 5")
+# and must NOT be glued on as if they were a clause suffix ("34of" would never match "34").
+_NOT_A_SUFFIX = frozenset("of in to is as at on or by be an if it no so up we do he me my us am".split())
+
+
+def _join_spaced_clause_id(match: re.Match) -> str:
+    number, letters = match.groups()
+    return match.group(0) if letters in _NOT_A_SUFFIX else number + letters
 
 
 def tokenize(text: str) -> list[str]:
     text = text.lower()
-    text = _SPACED_CLAUSE_ID.sub(r"\1\2", text)  # "clause 10 cc" -> "clause 10cc"
+    text = _SPACED_CLAUSE_ID.sub(_join_spaced_clause_id, text)  # "clause 10 cc" -> "clause 10cc"
     return [t for t in _TOKEN.findall(text) if t not in _STOPWORDS]
 
 
@@ -93,7 +109,10 @@ class Retriever:
         self.chunks = chunks
         self.embeddings = embeddings
         self.model = model
-        self.bm25 = BM25Okapi([tokenize(c.index_text) for c in chunks])
+        corpus = [tokenize(c.index_text) for c in chunks]
+        self.bm25 = BM25Okapi(corpus)
+        self._chunk_tokens = [set(tokens) for tokens in corpus]
+        self._chunk_frequency = Counter(token for tokens in self._chunk_tokens for token in tokens)
         self._amendments_by_target = self._index_amendments(chunks)
         self._parts_by_parent = self._index_parts(chunks)
 
@@ -141,6 +160,7 @@ class Retriever:
         mode: str = "hybrid",
         expand: bool = True,
         siblings: bool = True,
+        pin: bool = True,
     ) -> SearchResult:
         """Retrieve the top chunks for a question.
 
@@ -148,6 +168,7 @@ class Retriever:
             mode: "hybrid" (default), "bm25" or "dense" - the latter two exist for the ablation study.
             expand: Attach amendments to the provisions they modify (and vice versa).
             siblings: Attach the other parts of a split curated table.
+            pin: Include chunks holding a rare identifier named in the question.
         """
         dense = self.dense_ranking(query)
         best_cosine = dense[0][1] if dense else 0.0
@@ -162,11 +183,36 @@ class Retriever:
             raise ValueError(f"Unknown mode: {mode}")
 
         hits = [Hit(self.chunks[i], score, ranks) for i, score, ranks in ranked[:top_k]]
+        if pin:
+            hits = self._pin_rare_identifiers(query, hits)
         if siblings:
             hits = self._attach_siblings(hits)
         if expand:
             hits = self._expand_amendments(hits)
         return SearchResult(query, hits, best_cosine)
+
+    # -- identifier pinning --
+
+    def _pin_rare_identifiers(self, query: str, hits: list[Hit]) -> list[Hit]:
+        """Append chunks that contain a rare number-like identifier from the question (best BM25 first)."""
+        rare = [
+            token for token in dict.fromkeys(tokenize(query))
+            if any(ch.isdigit() for ch in token) and 0 < self._chunk_frequency[token] <= RARE_IDENTIFIER_MAX_CHUNKS
+        ]
+        if not rare:
+            return hits
+        seen = {h.chunk.chunk_id for h in hits}
+        scores = self.bm25.get_scores(tokenize(query))
+        pinned: list[Hit] = []
+        for token in rare:
+            holders = sorted((i for i, tokens in enumerate(self._chunk_tokens) if token in tokens), key=lambda i: -scores[i])
+            for i in holders:
+                if len(pinned) >= MAX_PINNED:
+                    break
+                if self.chunks[i].chunk_id not in seen:
+                    seen.add(self.chunks[i].chunk_id)
+                    pinned.append(Hit(self.chunks[i], float(scores[i]), attached_reason=f"contains '{token}' from the question"))
+        return hits + pinned
 
     # -- sibling expansion --
 

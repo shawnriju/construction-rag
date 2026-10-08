@@ -48,6 +48,8 @@ class TableProbe:
 
 
 # Answers come from the hand-checked curated tables (data/curated/is875.yaml).
+# City patterns accept the curator's inline modern name ("Madras [now Chennai] 50"),
+# which newer builds have and older ones don't.
 # The two interpolation questions need rows that sit in different Table 2 parts.
 PROBES = [
     TableProbe("What is the k2 factor at 10 m height for terrain category 1, class A?", "Table 2", (r"\|\s*10\s*\|",)),
@@ -63,9 +65,9 @@ PROBES = [
                (r"\|\s*200\s*\|", r"\|\s*250\s*\|")),
     TableProbe("What is the basic wind speed for Agra?", "Appendix A", (r"Agra 47",)),
     TableProbe("Basic wind speed in Delhi", "Appendix A", (r"Delhi 47",)),
-    TableProbe("What is the basic wind speed in Mumbai?", "Appendix A", (r"Bombay 44",)),
-    TableProbe("What is the basic wind speed in Chennai?", "Appendix A", (r"Madras 50",)),
-    TableProbe("Basic wind speed for Thiruvananthapuram", "Appendix A", (r"Trivandrum 39",)),
+    TableProbe("What is the basic wind speed in Mumbai?", "Appendix A", (r"Bombay (?:\[now Mumbai\] )?44",)),
+    TableProbe("What is the basic wind speed in Chennai?", "Appendix A", (r"Madras (?:\[now Chennai\] )?50",)),
+    TableProbe("Basic wind speed for Thiruvananthapuram", "Appendix A", (r"Trivandrum (?:\[now Thiruvananthapuram\] )?39",)),
     TableProbe("What is the basic wind speed at Vadodara?", "Appendix A", (r"Vadodara 44",)),
     TableProbe("Basic wind speed for Visakhapatnam", "Appendix A", (r"Visakhapatnam 50",)),
 ]

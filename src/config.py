@@ -50,6 +50,11 @@ MAX_ATTACHED = 4      # Extra chunks added by amendment expansion.
 # Extra chunks added by sibling expansion (the other parts of a split curated
 # table). Separate budget, so table parts never crowd out an amendment.
 MAX_SIBLINGS_ATTACHED = 3
+# Identifier pinning: if the question names a number-like identifier ("Article 142")
+# that occurs in at most this many chunks, those chunks are always included.
+# Common ones ("0.2" in 15 chunks, "Section 34" in 93) don't trigger it.
+RARE_IDENTIFIER_MAX_CHUNKS = 3
+MAX_PINNED = 2
 # Below this cosine similarity of the best dense hit, results are flagged as
 # low-confidence. Provisional value; calibrated on the gold set's unanswerable questions.
 LOW_CONFIDENCE_COSINE = 0.55
@@ -59,3 +64,13 @@ LLM_BACKEND = os.getenv("LLM_BACKEND", "ollama")  # "ollama" | "none"
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:3b-instruct")
 LLM_TIMEOUT_SECONDS = 180
+# Greedy decoding + a fixed seed: the same question over the same sources always
+# gets the same answer, so a demo or an eval run can be reproduced. (At 0.1, the
+# Chennai question flipped to "not found" in 2 of 10 identical runs.)
+LLM_TEMPERATURE = 0.0
+LLM_SEED = 42
+# Context window requested from Ollama. The largest prompt (6 hits + 3 table
+# parts + 4 amendments, each <= ~450 tokens) is ~6k tokens, leaving room for the answer.
+LLM_CONTEXT_TOKENS = 8192
+# Ollama's health check should fail fast, so a missing server never stalls the CLI.
+LLM_HEALTH_TIMEOUT_SECONDS = 3

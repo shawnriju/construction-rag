@@ -1,0 +1,32 @@
+# Today's names for places that the source documents print under older names.
+#
+# Why this file exists:
+#   The 1987 standard lists "Madras 50", so a question about "Chennai" has to be
+#   connected to it. With the modern names only in a note at the end of the list,
+#   qwen2.5:3b answered "Chennai: not found" in 2 of 10 runs; with the modern name
+#   right next to the old one ("Madras [now Chennai] 50") it answered 10 of 10.
+#
+# How it is applied (src/ingest/curated.py), at build time:
+#   * only to the curated entries listed in `apply_to` - never to the PDF text, where
+#     an old name can be part of an official name ("Bombay High Court");
+#   * each old name (whole word) gets " [now <new name>]" after it, and a `legend`
+#     line is added saying the brackets are curator additions.
+# The transcription in is875.yaml is never edited: it stays exactly as printed.
+
+apply_to: [Appendix A]
+
+legend: "[Names in square brackets are today's city names, added by the curator.]"
+
+aliases:
+  Bombay: Mumbai
+  Calcutta: Kolkata
+  Bangalore: Bengaluru
+  Gauhati: Guwahati
+  Calicut: Kozhikode
+  Bhatinda: Bathinda
+  Madras: Chennai
+  Simla: Shimla
+  Trivandrum: Thiruvananthapuram
+  Vijaywada: Vijayawada
+  Pondicherry: Puducherry
+  Panjim: Panaji

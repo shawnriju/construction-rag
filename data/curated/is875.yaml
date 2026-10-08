@@ -134,19 +134,18 @@ tables:
     pdf_pages: [57]
     printed_pages: ["53"]
     covers: [Appendix A]
-    # Split alphabetically (526 tokens > 512). Each part's curator note lists
-    # only the renamed cities in that part, so "Chennai" retrieves the right one.
+    # Split alphabetically (526 tokens > 512). Transcribed exactly as printed (1987 city
+    # names). Today's names ("Madras [now Chennai]") are added at build time from
+    # place_aliases.yaml, so this file stays a faithful copy of the page.
     header: |
       Appendix A (clause 5.2): basic wind speed Vb (m/s) at 10 m height, 50-year return period.
     parts:
       - label: Agra to Jamshedpur
         text: |
           Agra 47; Ahmadabad 39; Ajmer 47; Almora 47; Amritsar 47; Asansol 47; Aurangabad 39; Bahraich 47; Bangalore 33; Barauni 47; Bareilly 47; Bhatinda 47; Bhilai 39; Bhopal 39; Bhubaneshwar 50; Bhuj 50; Bikaner 47; Bokaro 47; Bombay 44; Calcutta 50; Calicut 39; Chandigarh 47; Coimbatore 39; Cuttack 50; Darbhanga 55; Darjeeling 47; Dehra Dun 47; Delhi 47; Durgapur 47; Gangtok 47; Gauhati 50; Gaya 39; Gorakhpur 47; Hyderabad 44; Imphal 47; Jabalpur 47; Jaipur 47; Jamshedpur 47;
-          [Curator note, not part of the standard: the 1987 names correspond to today's Mumbai (Bombay), Kolkata (Calcutta), Bengaluru (Bangalore), Guwahati (Gauhati), Kozhikode (Calicut), Bathinda (Bhatinda).]
       - label: Jhansi to Visakhapatnam
         text: |
           Jhansi 47; Jodhpur 47; Kanpur 47; Kohima 44; Kurnool 39; Lakshadweep 39; Lucknow 47; Ludhiana 47; Madras 50; Madurai 39; Mandi 39; Mangalore 39; Moradabad 47; Mysore 33; Nagpur 44; Nainital 47; Nasik 39; Nellore 50; Panjim 39; Patiala 47; Patna 47; Pondicherry 50; Port Blair 44; Pune 39; Raipur 39; Rajkot 39; Ranchi 39; Roorkee 39; Rourkela 39; Simla 39; Srinagar 39; Surat 44; Tiruchchirrappalli 47; Trivandrum 39; Udaipur 47; Vadodara 44; Varanasi 47; Vijaywada 50; Visakhapatnam 50.
-          [Curator note, not part of the standard: the 1987 names correspond to today's Chennai (Madras), Shimla (Simla), Thiruvananthapuram (Trivandrum), Vijayawada (Vijaywada), Puducherry (Pondicherry), Panaji (Panjim).]
 
 amendments:
   - number: 1

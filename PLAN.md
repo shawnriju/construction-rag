@@ -26,9 +26,10 @@ code, not only in the prompt. The scope of the corpus is stated plainly as "IS 8
 I don't make claims about later revisions unless they are verified.
 
 **Curated content** (`data/curated/is875.yaml`, `source=curated`): Table 1 (k1, with its Note as a separate
-entry), Table 2 (k2), Table 28, and Appendix A (city basic wind speeds, plus a labelled curator note mapping old
-city names to new ones, e.g. Madras→Chennai). Tables are transcribed **exactly as printed**: Table 28 keeps 1.0,
-and the 1.8 correction exists only in the Amd 2 chunk, so the amendment handling is what produces the right answer.
+entry), Table 2 (k2), Table 28, and Appendix A (city basic wind speeds). Tables are transcribed **exactly as printed**:
+Table 28 keeps 1.0, and the 1.8 correction exists only in the Amd 2 chunk, so the amendment handling is what produces
+the right answer. Anything the curator adds lives in a separate file and is applied at build time, clearly marked
+(today's city names from `place_aliases.yaml`, e.g. "Madras [now Chennai] 50").
 All three amendments are curated item by item, because the Amd 3 page has no text layer.
 Table 2 and Appendix A are too long for the embedder's 512-token window, so they are stored as parts
 (Table 2 by height, Appendix A alphabetically), each repeating the caption and column headings. Parts are
@@ -169,6 +170,8 @@ eval/                gold.jsonl, run.py, report.md, compare_chunking.py (before/
 artifacts/           chunks.jsonl, embeddings.npy, index_meta.json  (prebuilt, committed)
 requirements.txt          runtime, CPU torch
 requirements-train.txt    training, CUDA torch
+requirements-dev.txt      pytest (development only)
+tests/               pytest suite: unit tests + checks on the committed artifacts (offline, no Ollama)
 ```
 
 ## 6. Reviewer experience
