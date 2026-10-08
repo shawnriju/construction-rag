@@ -28,6 +28,12 @@ GOLD_PATH = EVAL_DIR / "gold.jsonl"                # Hand-verified evaluation qu
 GOLD_REVIEW_PATH = EVAL_DIR / "gold_review.md"     # Checking sheet rendered from GOLD_PATH.
 EVAL_RESULTS_DIR = EVAL_DIR / "results"            # Reports + per-question JSON written by eval.run.
 
+FINETUNE_DATA_DIR = PROJECT_ROOT / "finetune" / "data"
+CANDIDATES_PATH = FINETUNE_DATA_DIR / "candidates.jsonl"  # Raw LLM questions per chunk (resumable).
+TRAIN_PAIRS_PATH = FINETUNE_DATA_DIR / "train.jsonl"
+VAL_PAIRS_PATH = FINETUNE_DATA_DIR / "val.jsonl"
+PAIRS_REPORT_PATH = FINETUNE_DATA_DIR / "pairs_report.md"
+
 # --- Chunking ----------------------------------------------------------------
 # Chunks are sized in the embedder's own tokens, not words: tables, numbers and
 # OCR noise cost up to ~3 tokens per word ("0.85" -> "0" "." "85"), so a word
@@ -79,3 +85,29 @@ LLM_SEED = 42
 LLM_CONTEXT_TOKENS = 8192
 # Ollama's health check should fail fast, so a missing server never stalls the CLI.
 LLM_HEALTH_TIMEOUT_SECONDS = 3
+
+# --- Fine-tuning data (finetune/make_pairs.py; PLAN.md section 3) -------------
+QUESTIONS_PER_CHUNK = 2   # Run time depends on the number of chunks (one LLM call each), not on this.
+FINETUNE_SEED = 42
+# A question sharing a run of this many words with its passage is too easy: it teaches string matching.
+COPIED_PHRASE_WORDS = 6
+# Two questions whose word sets overlap this much are near-duplicates; the later one is dropped.
+NEAR_DUPLICATE_JACCARD = 0.8
+# If the passage isn't in the BM25 or dense top N for its own question, the question is probably bad.
+RETRIEVABLE_TOP_N = 50
+# Leak guard: drop a training question this similar (base-embedder cosine) to any gold question.
+GOLD_LEAK_COSINE = 0.85
+# Hard negative = the best BM25 hit among the top N that isn't the passage, its section or its table.
+HARD_NEGATIVE_POOL = 10
+VALIDATION_FRACTION = 0.1  # Held back from training to watch for overfitting.
+
+# --- Fine-tuning run (finetune/train.py, GTX 1650 with 4 GB) --------------------
+FINETUNE_OUTPUT_DIR = PROJECT_ROOT / "finetune" / "output" / "bge-small-construction"  # gitignored
+TRAIN_EPOCHS = 3              # The best epoch on the validation split (MAP@100) is kept (catches overfitting).
+TRAIN_LEARNING_RATE = 2e-5
+TRAIN_WARMUP_RATIO = 0.1
+# Contrastive loss: every question is also contrasted with the other passages in its batch, so a
+# bigger batch gives more negatives. GradCache (CachedMultipleNegativesRankingLoss) keeps that
+# 32-question batch but runs it through the GPU 8 at a time, so 512-token passages fit in 4 GB.
+TRAIN_BATCH_SIZE = 32
+TRAIN_MINI_BATCH_SIZE = 8

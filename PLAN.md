@@ -7,6 +7,8 @@
 > Revised again 2026-10-08 before Phase 5: no base-model fallback for the fine-tuned model (§3 Delivery), 2 training questions
 > per chunk with a small trial first (§3 Data), and a gold set that mixes natural and document wording, is scored as both
 > "found" and "fully supported", and locates every gold passage by id, page and quote (§4).
+> Status 2026-10-08: steps 1-6 of §7 built and measured (results in eval/results/ and progress.md §11);
+> the fine-tuned embedder won under the pre-committed rule and ships via the Hugging Face Hub (user decision).
 
 A small, cited RAG over three Indian construction documents of different types, plus a fine-tuned
 retrieval embedder. Scope target: about one day of work. This is an interview demo, not a production system.
@@ -113,6 +115,10 @@ section or table. These are the near-misses (10CA vs 10CC, neighbouring ¶s), wh
 **Training:** `MultipleNegativesRankingLoss` (each question is also contrasted with every other passage in the batch,
 for free), lr ~2e-5, 1–3 epochs, fixed seed, 10% of the training questions held back as a validation split to catch
 overfitting. Runs locally on CUDA (`requirements-train.txt`); the reviewer's install stays CPU-only.
+*As built:* the cached (GradCache) form of the loss, batch 32 run 8 at a time so 512-token passages fit in 4 GB; a
+no-duplicates batch sampler (a passage with two questions is never a negative for itself); 3 epochs with the best epoch
+kept by validation MAP@100; training in its own venv (`.venv-train`, `torch==2.4.1+cu121`) so the tested runtime venv is
+untouched. Data: 896 qwen questions (2 per chunk) → 683 kept → 615 train / 68 validation.
 
 **Protocol: transductive.** Train on questions over all chunks; test on the human gold questions (new wording, same
 documents). This matches the task (a RAG bot over *these* documents) and is reported as **corpus adaptation, not
@@ -123,6 +129,12 @@ generalisation to new documents**. A strict hold-out split (sections never seen 
 and hybrid. The fine-tuned model **ships only if** it has more per-question wins than losses on hybrid hit@5 (ties broken by
 MRR) **and** breaks no amendment-sensitive question. Otherwise the base model ships, and the result is reported honestly.
 The low-confidence threshold is recalibrated for whichever model ships, because fine-tuning changes the similarity scale.
+
+**Result (2026-10-08, `eval/results/comparison_base_vs_finetuned.md`): the fine-tuned model SHIPS.** Hybrid Hit@5 per
+question: fixed 4, broke 2 (both only slipped one place inside the top 5), no amendment question broken. Hit@5 dense
+20 → 23/26, hybrid 22 → 23/26; MRR@10 dense 0.590 → 0.645, hybrid 0.622 → 0.670; natural wording 12 → 13/15. The two
+vocabulary misses moved up (rank 38 → 24, 40 → 22) but stay outside the top 6, so what reaches the LLM is unchanged
+(24/26 found, 22/26 fully supported). The cosine scale spread out: low-confidence cutoff 0.55 → ~0.51.
 
 **Delivery:** the fine-tuned model goes to a free Hugging Face Hub repo and downloads automatically. The committed index is rebuilt with
 whichever model ships (`python -m src.index --model ...`); `index_meta.json` records that model and the app loads it, so the vectors
@@ -149,15 +161,19 @@ original *and* its amendment):
 
 | Retriever | R@1 | R@5 | MRR |
 |---|---|---|---|
-| BM25 | | | |
-| Dense (base) | | | |
-| Hybrid (base) | | | |
-| Dense (fine-tuned) | | | |
-| Hybrid (fine-tuned) | | | |
-| (+ reranker, if built) | | | |
+| BM25 | 12/26 | 21/26 | 0.616 |
+| Dense (base) | 11/26 | 20/26 | 0.590 |
+| Hybrid (base) | 12/26 | 22/26 | 0.622 |
+| Dense (fine-tuned) | 12/26 | 23/26 | 0.645 |
+| Hybrid (fine-tuned) | 13/26 | 23/26 | 0.670 |
+| (+ reranker) | not built (cut first, §7) | | |
+
+(Filled in 2026-10-08; R@k = the first evidence passage is in the top k, MRR@10.)
 
 **Generation:** answer correctness (exact match on numeric questions, manual check otherwise), citation correctness
 (the cited chunk supports the claim), and abstention accuracy. Plus a manual review of about 15 answers.
+*Base result (2026-10-08, qwen2.5:3b):* 15/26 answerable right, 7/7 unanswerable correctly "not found"; of 11 failures,
+9 are the generator (the evidence was in its context) and 2 are retrieval. To be re-run with the shipped embedder.
 **Reporting with a small n (≈30):** counts next to every percentage ("22/30"), and **per-question wins/losses** between
 two systems ("fine-tune fixed 4, broke 1") rather than a claim of "improves" from a 2-point gap. Retrieval quality and
 generation quality are reported separately; the 3B generator is the swappable weak link, and its known limits (wide-table cells,
@@ -214,8 +230,9 @@ As built, steps 1–3 were done together (all three parsers + curated content be
 2. BM25 + CLI over CPWD only. This is the first end-to-end answer.
 3. Ssangyong + IS 875 chunkers, curated tables, amendment metadata.
 4. Dense + RRF + `--debug`; Ollama generation + citation validator + retrieval-only fallback.
-5. Gold set drafted, verified by you, baselines run.
-6. Synthetic pairs (qwen first; Groq if needed, see §3) → fine-tune → transductive protocol → ablation table.
+5. Gold set drafted, verified by you, baselines run. ✅
+6. Synthetic pairs (qwen first; Groq if needed, see §3) → fine-tune → transductive protocol → ablation table. ✅ (qwen passed
+   the checkpoint; Groq not needed). Remaining: HF Hub upload, switch the index, answer re-eval.
 7. Streamlit UI.
 8. README, DECISIONS.md (incl. an "expected failure modes" section and why the Hindi documents were skipped), HF Hub upload, clean-machine test.
 Future work (DECISIONS.md): strict hold-out split for the fine-tune.

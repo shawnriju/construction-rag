@@ -16,7 +16,16 @@ from eval.metrics import (
     score_threshold,
     wins_losses,
 )
-from eval.retrieval import CONTEXT_CONFIGS, FULL_PIPELINE, evaluate_retrieval, format_report, write_results
+from eval.retrieval import (
+    CONTEXT_CONFIGS,
+    FULL_PIPELINE,
+    RetrievalResult,
+    evaluate_retrieval,
+    format_comparison,
+    format_report,
+    verdict,
+    write_results,
+)
 from src.cite import NOT_FOUND
 from src.retrieve import Retriever
 from tests.helpers import FakeEmbedder, make_chunk, unit_embeddings
@@ -117,3 +126,34 @@ def test_report_and_json_are_written(results, tmp_path):
 
 def test_report_without_unanswerable_questions_skips_calibration(results):
     assert "nothing to calibrate" in format_report(results[:1], "toy")
+
+
+# --- comparing two runs ------------------------------------------------------------------
+
+
+def _run(ranks: dict[str, int | None], amendment_full: bool = True) -> list[RetrievalResult]:
+    results = []
+    for qid, rank in ranks.items():
+        qtype = "amendment" if qid == "amd" else "fact"
+        full = amendment_full if qid == "amd" else True
+        results.append(RetrievalResult(qid, "is875", qtype, "natural", True, {m: rank for m in ("bm25", "dense", "hybrid")},
+                                       {FULL_PIPELINE: True}, {FULL_PIPELINE: full}, {FULL_PIPELINE: 6}, 0.8))
+    return results
+
+
+def test_new_embedder_ships_with_more_wins_and_no_broken_amendment():
+    base = _run({"a": 9, "b": 1, "amd": 1})
+    assert verdict(base, _run({"a": 2, "b": 1, "amd": 1})).ships
+    assert not verdict(base, _run({"a": 2, "b": 8, "amd": 1})).ships                       # 1 win, 1 loss
+    assert not verdict(base, _run({"a": 2, "b": 1, "amd": 1}, amendment_full=False)).ships  # amendment broken
+
+
+def test_comparison_refuses_runs_on_different_questions():
+    with pytest.raises(ValueError, match="different gold questions"):
+        verdict(_run({"a": 1}), _run({"b": 1}))
+
+
+def test_comparison_report_states_the_verdict():
+    text = format_comparison(_run({"a": 9, "b": 1, "amd": 1}), _run({"a": 2, "b": 1, "amd": 1}), "base", "finetuned")
+    assert "**FINETUNED SHIPS**" in text
+    assert "| a | natural | 9 | 2 | 9 | 2 |" in text

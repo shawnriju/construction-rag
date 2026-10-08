@@ -1,0 +1,1124 @@
+[
+ {
+  "id": "cpwd-01",
+  "doc": "cpwd",
+  "type": "numeric",
+  "wording": "natural",
+  "answerable": true,
+  "ranks": {
+   "bm25": 12,
+   "dense": 1,
+   "hybrid": 3
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.5955
+ },
+ {
+  "id": "cpwd-02",
+  "doc": "cpwd",
+  "type": "numeric",
+  "wording": "document",
+  "answerable": true,
+  "ranks": {
+   "bm25": 1,
+   "dense": 2,
+   "hybrid": 1
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.6198
+ },
+ {
+  "id": "cpwd-03",
+  "doc": "cpwd",
+  "type": "numeric",
+  "wording": "natural",
+  "answerable": true,
+  "ranks": {
+   "bm25": 1,
+   "dense": 1,
+   "hybrid": 1
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.6706
+ },
+ {
+  "id": "cpwd-04",
+  "doc": "cpwd",
+  "type": "numeric",
+  "wording": "document",
+  "answerable": true,
+  "ranks": {
+   "bm25": 2,
+   "dense": 2,
+   "hybrid": 2
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.5729
+ },
+ {
+  "id": "cpwd-05",
+  "doc": "cpwd",
+  "type": "numeric",
+  "wording": "natural",
+  "answerable": true,
+  "ranks": {
+   "bm25": 1,
+   "dense": 1,
+   "hybrid": 1
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.6386
+ },
+ {
+  "id": "cpwd-06",
+  "doc": "cpwd",
+  "type": "numeric",
+  "wording": "natural",
+  "answerable": true,
+  "ranks": {
+   "bm25": 2,
+   "dense": 1,
+   "hybrid": 1
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.6101
+ },
+ {
+  "id": "cpwd-07",
+  "doc": "cpwd",
+  "type": "fact",
+  "wording": "document",
+  "answerable": true,
+  "ranks": {
+   "bm25": 1,
+   "dense": 4,
+   "hybrid": 2
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.5146
+ },
+ {
+  "id": "ssy-01",
+  "doc": "ssangyong",
+  "type": "fact",
+  "wording": "natural",
+  "answerable": true,
+  "ranks": {
+   "bm25": null,
+   "dense": 11,
+   "hybrid": 24
+  },
+  "found": {
+   "full pipeline": false,
+   "without pinning": false,
+   "without table parts": false,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "full": {
+   "full pipeline": false,
+   "without pinning": false,
+   "without table parts": false,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.5557
+ },
+ {
+  "id": "ssy-02",
+  "doc": "ssangyong",
+  "type": "fact",
+  "wording": "document",
+  "answerable": true,
+  "ranks": {
+   "bm25": 5,
+   "dense": null,
+   "hybrid": 12
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": false,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": false
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": false,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": false
+  },
+  "chunks_sent": {
+   "full pipeline": 7,
+   "without pinning": 6,
+   "without table parts": 7,
+   "without amendments": 7,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.4855
+ },
+ {
+  "id": "ssy-03",
+  "doc": "ssangyong",
+  "type": "fact",
+  "wording": "document",
+  "answerable": true,
+  "ranks": {
+   "bm25": 2,
+   "dense": 2,
+   "hybrid": 2
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.7189
+ },
+ {
+  "id": "ssy-04",
+  "doc": "ssangyong",
+  "type": "fact",
+  "wording": "natural",
+  "answerable": true,
+  "ranks": {
+   "bm25": 3,
+   "dense": 4,
+   "hybrid": 3
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.538
+ },
+ {
+  "id": "ssy-05",
+  "doc": "ssangyong",
+  "type": "fact",
+  "wording": "document",
+  "answerable": true,
+  "ranks": {
+   "bm25": 2,
+   "dense": 2,
+   "hybrid": 2
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.7248
+ },
+ {
+  "id": "ssy-06",
+  "doc": "ssangyong",
+  "type": "fact",
+  "wording": "natural",
+  "answerable": true,
+  "ranks": {
+   "bm25": 1,
+   "dense": 1,
+   "hybrid": 1
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": false,
+   "without pinning": false,
+   "without table parts": false,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.623
+ },
+ {
+  "id": "ssy-07",
+  "doc": "ssangyong",
+  "type": "fact",
+  "wording": "natural",
+  "answerable": true,
+  "ranks": {
+   "bm25": null,
+   "dense": 9,
+   "hybrid": 22
+  },
+  "found": {
+   "full pipeline": false,
+   "without pinning": false,
+   "without table parts": false,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "full": {
+   "full pipeline": false,
+   "without pinning": false,
+   "without table parts": false,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.5258
+ },
+ {
+  "id": "is875-01",
+  "doc": "is875",
+  "type": "amendment",
+  "wording": "document",
+  "answerable": true,
+  "ranks": {
+   "bm25": 1,
+   "dense": 1,
+   "hybrid": 1
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 7,
+   "without pinning": 7,
+   "without table parts": 7,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.8261
+ },
+ {
+  "id": "is875-02",
+  "doc": "is875",
+  "type": "amendment",
+  "wording": "natural",
+  "answerable": true,
+  "ranks": {
+   "bm25": 2,
+   "dense": 2,
+   "hybrid": 2
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "chunks_sent": {
+   "full pipeline": 7,
+   "without pinning": 7,
+   "without table parts": 7,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.6924
+ },
+ {
+  "id": "is875-03",
+  "doc": "is875",
+  "type": "amendment",
+  "wording": "document",
+  "answerable": true,
+  "ranks": {
+   "bm25": 1,
+   "dense": 2,
+   "hybrid": 1
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 7,
+   "without pinning": 7,
+   "without table parts": 7,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.627
+ },
+ {
+  "id": "is875-04",
+  "doc": "is875",
+  "type": "table",
+  "wording": "natural",
+  "answerable": true,
+  "ranks": {
+   "bm25": 1,
+   "dense": 1,
+   "hybrid": 1
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 9,
+   "without pinning": 9,
+   "without table parts": 7,
+   "without amendments": 8,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.712
+ },
+ {
+  "id": "is875-05",
+  "doc": "is875",
+  "type": "table",
+  "wording": "document",
+  "answerable": true,
+  "ranks": {
+   "bm25": 5,
+   "dense": 3,
+   "hybrid": 4
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.5153
+ },
+ {
+  "id": "is875-06",
+  "doc": "is875",
+  "type": "table",
+  "wording": "natural",
+  "answerable": true,
+  "ranks": {
+   "bm25": 9,
+   "dense": 1,
+   "hybrid": 2
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 7,
+   "without pinning": 7,
+   "without table parts": 7,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.5416
+ },
+ {
+  "id": "is875-07",
+  "doc": "is875",
+  "type": "fact",
+  "wording": "natural",
+  "answerable": true,
+  "ranks": {
+   "bm25": 1,
+   "dense": 3,
+   "hybrid": 1
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 8,
+   "without pinning": 8,
+   "without table parts": 8,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.5978
+ },
+ {
+  "id": "is875-08",
+  "doc": "is875",
+  "type": "table",
+  "wording": "natural",
+  "answerable": true,
+  "ranks": {
+   "bm25": 2,
+   "dense": 2,
+   "hybrid": 2
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 8,
+   "without pinning": 8,
+   "without table parts": 8,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.6159
+ },
+ {
+  "id": "is875-09",
+  "doc": "is875",
+  "type": "amendment",
+  "wording": "document",
+  "answerable": true,
+  "ranks": {
+   "bm25": 1,
+   "dense": 1,
+   "hybrid": 1
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "chunks_sent": {
+   "full pipeline": 9,
+   "without pinning": 9,
+   "without table parts": 8,
+   "without amendments": 7,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.5846
+ },
+ {
+  "id": "is875-10",
+  "doc": "is875",
+  "type": "amendment",
+  "wording": "document",
+  "answerable": true,
+  "ranks": {
+   "bm25": 1,
+   "dense": 1,
+   "hybrid": 1
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "chunks_sent": {
+   "full pipeline": 9,
+   "without pinning": 9,
+   "without table parts": 9,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.704
+ },
+ {
+  "id": "cross-01",
+  "doc": "cross",
+  "type": "cross_doc",
+  "wording": "natural",
+  "answerable": true,
+  "ranks": {
+   "bm25": 1,
+   "dense": 1,
+   "hybrid": 1
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.5965
+ },
+ {
+  "id": "cross-02",
+  "doc": "cross",
+  "type": "cross_doc",
+  "wording": "natural",
+  "answerable": true,
+  "ranks": {
+   "bm25": 6,
+   "dense": 1,
+   "hybrid": 1
+  },
+  "found": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "full": {
+   "full pipeline": false,
+   "without pinning": false,
+   "without table parts": false,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.5889
+ },
+ {
+  "id": "none-01",
+  "doc": "none",
+  "type": "unanswerable",
+  "wording": "natural",
+  "answerable": false,
+  "ranks": {
+   "bm25": null,
+   "dense": null,
+   "hybrid": null
+  },
+  "found": {
+   "full pipeline": false,
+   "without pinning": false,
+   "without table parts": false,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.5003
+ },
+ {
+  "id": "none-02",
+  "doc": "none",
+  "type": "unanswerable",
+  "wording": "natural",
+  "answerable": false,
+  "ranks": {
+   "bm25": null,
+   "dense": null,
+   "hybrid": null
+  },
+  "found": {
+   "full pipeline": false,
+   "without pinning": false,
+   "without table parts": false,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 8,
+   "without pinning": 8,
+   "without table parts": 8,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.6262
+ },
+ {
+  "id": "none-03",
+  "doc": "none",
+  "type": "unanswerable",
+  "wording": "natural",
+  "answerable": false,
+  "ranks": {
+   "bm25": null,
+   "dense": null,
+   "hybrid": null
+  },
+  "found": {
+   "full pipeline": false,
+   "without pinning": false,
+   "without table parts": false,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.4929
+ },
+ {
+  "id": "none-04",
+  "doc": "none",
+  "type": "unanswerable",
+  "wording": "natural",
+  "answerable": false,
+  "ranks": {
+   "bm25": null,
+   "dense": null,
+   "hybrid": null
+  },
+  "found": {
+   "full pipeline": false,
+   "without pinning": false,
+   "without table parts": false,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 8,
+   "without pinning": 8,
+   "without table parts": 7,
+   "without amendments": 7,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.3944
+ },
+ {
+  "id": "none-05",
+  "doc": "none",
+  "type": "unanswerable",
+  "wording": "natural",
+  "answerable": false,
+  "ranks": {
+   "bm25": null,
+   "dense": null,
+   "hybrid": null
+  },
+  "found": {
+   "full pipeline": false,
+   "without pinning": false,
+   "without table parts": false,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 7,
+   "without pinning": 7,
+   "without table parts": 7,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.4487
+ },
+ {
+  "id": "none-06",
+  "doc": "none",
+  "type": "unanswerable",
+  "wording": "natural",
+  "answerable": false,
+  "ranks": {
+   "bm25": null,
+   "dense": null,
+   "hybrid": null
+  },
+  "found": {
+   "full pipeline": false,
+   "without pinning": false,
+   "without table parts": false,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.4084
+ },
+ {
+  "id": "none-07",
+  "doc": "none",
+  "type": "unanswerable",
+  "wording": "natural",
+  "answerable": false,
+  "ranks": {
+   "bm25": null,
+   "dense": null,
+   "hybrid": null
+  },
+  "found": {
+   "full pipeline": false,
+   "without pinning": false,
+   "without table parts": false,
+   "without amendments": false,
+   "plain top 6": false
+  },
+  "full": {
+   "full pipeline": true,
+   "without pinning": true,
+   "without table parts": true,
+   "without amendments": true,
+   "plain top 6": true
+  },
+  "chunks_sent": {
+   "full pipeline": 6,
+   "without pinning": 6,
+   "without table parts": 6,
+   "without amendments": 6,
+   "plain top 6": 6
+  },
+  "best_cosine": 0.3702
+ }
+]

@@ -39,6 +39,8 @@ class FakeEmbedder:
     def encode(self, text, normalize_embeddings: bool = True, **_):
         vector = np.zeros(self.dim, dtype=np.float32)
         vector[0] = 1.0
+        if isinstance(text, list):  # Like SentenceTransformer: a list gives one row per text.
+            return np.tile(vector, (len(text), 1))
         return vector
 
 
