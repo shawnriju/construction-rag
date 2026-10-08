@@ -6,9 +6,13 @@ Two kinds of entries:
     with the provisions it `amends`, so retrieval can attach it to the
     original text it supersedes (see src/retrieve.py).
 
-The transcriptions are kept exactly as printed. Anything the curator adds
-(today's names for renamed cities, from data/curated/place_aliases.yaml) is
-applied here at build time and clearly marked, never written into the transcription.
+The transcriptions are kept exactly as printed. Anything the curator adds is
+applied here at build time and clearly marked, never written into the transcription:
+  * today's names for renamed cities (data/curated/place_aliases.yaml);
+  * an amendment item's optional `explanation`: a plain-language restatement of
+    an edit instruction like "Substitute '-0.5' for '0.5'", which on its own is
+    hard to retrieve and hard for a small model to interpret. It is appended as
+    "[Curator's explanation: ...]".
 """
 
 from __future__ import annotations
@@ -111,6 +115,15 @@ def _table_chunks(entry: dict, places: PlaceAliases) -> list[Chunk]:
     return chunks
 
 
+CURATOR_EXPLANATION = "[Curator's explanation: {}]"
+
+
+def amendment_text(item: dict) -> str:
+    """The printed instruction, plus the curator's explanation (if any), clearly marked."""
+    explanation = item.get("explanation")
+    return f"{item['text']} {CURATOR_EXPLANATION.format(explanation)}" if explanation else item["text"]
+
+
 def _amendment_chunks(amendment: dict) -> list[Chunk]:
     number, date = amendment["number"], amendment["date"]
     chunks = []
@@ -124,7 +137,7 @@ def _amendment_chunks(amendment: dict) -> list[Chunk]:
                 part="Amendments",
                 section=f"Amendment No. {number}, item {i}",
                 title=f"Amendment No. {number} ({date}) - amends {targets}",
-                text=f"Amendment No. {number} ({date}) to IS 875 (Part 3):1987. {item['text']}",
+                text=f"Amendment No. {number} ({date}) to IS 875 (Part 3):1987. {amendment_text(item)}",
                 pdf_pages=amendment["pdf_pages"],
                 printed_pages=[],
                 is_amendment=True,

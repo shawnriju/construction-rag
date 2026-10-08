@@ -47,3 +47,30 @@ def test_missing_alias_file_means_no_enrichment(tmp_path):
     entry = {"section": "Appendix A", "title": "t", "pdf_pages": [1], "printed_pages": ["1"], "text": "Madras 50"}
     (tmp_path / CURATED_FILE).write_text(yaml.safe_dump({"tables": [entry], "amendments": []}), encoding="utf-8")
     assert load(tmp_path)[0].text == "Madras 50"
+
+
+# --- Amendment explanations ------------------------------------------------------------
+
+# Curator wording that once sat inside amendment `text` fields (moved to `explanation`, 2026-10-08).
+MOVED_CURATOR_PHRASES = ["is therefore", "then reads", "For open-ended cylinders", "caption correction",
+                         "units of kinematic viscosity", "This replaces the original", "General notations showing"]
+
+
+def test_amendment_text_fields_hold_only_printed_wording():
+    data = yaml.safe_load((CURATED_DIR / CURATED_FILE).read_text(encoding="utf-8"))
+    texts = " ".join(item["text"] for amendment in data["amendments"] for item in amendment["items"])
+    for phrase in MOVED_CURATOR_PHRASES:
+        assert phrase not in texts, phrase
+
+
+def test_explanation_is_appended_and_marked_as_curator_text():
+    from src.ingest.curated import amendment_text
+
+    item = {"text": "Substitute '1.8' for '1.0'.", "explanation": "The value is therefore 1.8."}
+    assert amendment_text(item) == "Substitute '1.8' for '1.0'. [Curator's explanation: The value is therefore 1.8.]"
+    assert amendment_text({"text": "Delete 'closed'."}) == "Delete 'closed'."
+
+
+def test_built_amendment_chunks_carry_the_marked_explanation():
+    table_28_amendment = next(c for c in load(CURATED_DIR) if c.is_amendment and c.amends == ["Table 28"])
+    assert "Substitute '1.8' for '1.0'. [Curator's explanation: " in table_28_amendment.text

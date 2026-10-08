@@ -31,15 +31,19 @@ def test_chunk_ids_are_unique_and_every_chunk_has_pages(chunks):
     assert all(c.pdf_pages and c.text.strip() for c in chunks)
 
 
-# Known gap (progress.md §8): the OCR lost these headings, so their text sits inside a
-# neighbouring chunk and no chunk `covers` them; their amendments are not auto-attached.
-KNOWN_UNCOVERED_TARGETS = {"Table 12", "Table 14", "Table 19", "Table 32", "Fig. 13"}
-
-
 def test_every_amendment_targets_a_provision_present_in_the_corpus(chunks):
+    # Otherwise retrieval can never attach that amendment to the text it changes.
     covered = {p for c in chunks if not c.is_amendment for p in c.covers}
     missing = {t for c in chunks if c.is_amendment for t in c.amends if t not in covered}
-    assert missing <= KNOWN_UNCOVERED_TARGETS, f"New amendment targets no chunk covers: {missing - KNOWN_UNCOVERED_TARGETS}"
+    assert not missing, f"Amendment targets that no chunk covers: {missing}"
+
+
+def test_ocr_lost_provisions_are_covered_by_exactly_one_chunk(chunks):
+    from src.ingest.is875 import ABSORBED_PROVISIONS
+
+    for absorbed in ABSORBED_PROVISIONS:
+        hosts = [c.chunk_id for c in chunks if absorbed.provision in c.covers]
+        assert len(hosts) == 1, f"{absorbed.provision} covered by {hosts}"
 
 
 def test_modern_city_names_sit_next_to_the_old_ones(chunks):

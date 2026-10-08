@@ -157,52 +157,66 @@ amendments:
       - amends: [Table 23]
         text: "(Page 40, Table 23, first column, first row) - Substitute 'See also Appendix D' for 'See also Appendix C'."
       - amends: [Table 32]
-        text: "(Page 47, Table 32, col 2) - Substitute 'DVd >= 6 m2/s' for 'DVd <= 6 m2/s' (supercritical flow column heading)."
+        text: "(Page 47, Table 32, col 2) - Substitute 'DVd >= 6 m2/s' for 'DVd <= 6 m2/s'."
+        explanation: "supercritical flow column heading"
 
   - number: 2
     date: March 2002
     pdf_pages: [65, 66]
     items:
       - amends: []
-        text: "Substitute 'Vz' for 'Vd' at all places (the design wind velocity is Vz throughout the standard)."
+        text: "Substitute 'Vz' for 'Vd' at all places."
+        explanation: "the design wind velocity is Vz throughout the standard"
       - amends: [Table 5, Table 6, Table 7, Table 8]
         text: "(Tables 5, 6, 7 and 8) - Insert the following Note at the end of each table: 'NOTE - W and L are overall length and width including overhangs, w and l are dimensions between the walls excluding overhangs.'"
       - amends: [Table 9, Table 10, Table 11, Table 12, Table 13, Table 14]
         text: "(Tables 9, 10, 11, 12, 13 and 14, first column) - Substitute 'for all values of theta' in the last row for the specific values of theta given therein."
       - amends: [Cl. 6.2.2.7]
-        text: "(Page 27, clause 6.2.2.7(a)) - Insert at the end 'downwards'. Clause 6.2.2.7(a) on overhanging roofs then reads: 1.25 if the overhanging slopes downwards."
+        text: "(Page 27, clause 6.2.2.7(a)) - Insert at the end 'downwards'."
+        explanation: "Clause 6.2.2.7(a) on overhanging roofs then reads: 1.25 if the overhanging slopes downwards."
       - amends: [Cl. 6.2.2.8]
-        text: "(Page 27, clause 6.2.2.8(a)) - Substitute '-0.8' for '0.8'. For open-ended cylinders the internal pressure coefficient Cpi is -0.8 where h/D is not less than 0.3."
+        text: "(Page 27, clause 6.2.2.8(a)) - Substitute '-0.8' for '0.8'."
+        explanation: "For open-ended cylinders the internal pressure coefficient Cpi is -0.8 where h/D is not less than 0.3."
       - amends: [Cl. 6.2.2.8]
-        text: "(Page 27, clause 6.2.2.8(b)) - Substitute '-0.5' for '0.5'. For open-ended cylinders the internal pressure coefficient Cpi is -0.5 where h/D is less than 0.3."
+        text: "(Page 27, clause 6.2.2.8(b)) - Substitute '-0.5' for '0.5'."
+        explanation: "For open-ended cylinders the internal pressure coefficient Cpi is -0.5 where h/D is less than 0.3."
       - amends: [Cl. 6.2.2.9]
-        text: "(Page 27, clause 6.2.2.9) - Substitute 'P = 0.785 D^2 (Cpi - Cpe) pd' for the existing formula for the total resultant load on the roof of a cylindrical elevated structure."
+        text: "(Page 27, clause 6.2.2.9) - Substitute 'P = 0.785 D^2 (Cpi - Cpe) pd' for the existing formula."
+        explanation: "This is the formula for the total resultant load (P) acting on the roof of a cylindrical elevated structure."
       - amends: [Table 19]
         text: "(Page 32, Table 19) - Substitute 'P = 0.785 D^2 (Cpi - Cpe) pd' for the existing formula."
       - amends: [Table 27]
         text: "(Page 46, Table 27, third row) - Substitute 'DVd < 6 m2/s' for the existing."
       - amends: [Table 28]
-        text: "(Page 46, Table 28, col 2, second row) - Substitute '1.8' for '1.0'. The force coefficient for flat-sided members of a single frame with solidity ratio 0.2 is therefore 1.8, not 1.0."
+        text: "(Page 46, Table 28, col 2, second row) - Substitute '1.8' for '1.0'."
+        explanation: "The force coefficient for flat-sided members of a single frame with solidity ratio 0.2 is therefore 1.8, not 1.0."
       - amends: [Cl. 6.3.3.3]
         text: "(Page 46, clause 6.3.3.3, formula, last line) - Substitute 'gamma = (Area of the frame in a supercritical flow) / Ae' for the existing."
       - amends: [Cl. 7.1]
-        text: "(Page 47, clause 7.1(a), third line) - Substitute 'or' for 'and'. Buildings and structures with a height to minimum lateral dimension ratio of more than about 5.0, OR ..."
+        text: "(Page 47, clause 7.1(a), third line) - Substitute 'or' for 'and'."
+        explanation: "Buildings and structures with a height to minimum lateral dimension ratio of more than about 5.0, OR ..."
       - amends: [Cl. 7.1]
         text: "(Page 48, clause 7.1(b), first line) - Delete 'closed'."
       - amends: [Cl. 7.1]
-        text: "(Page 48, clause 7.1, fourth and fifth line) - Substitute 'satisfies' for 'does not satisfy'. Any building or structure which satisfies either of the two criteria of 7.1 shall be examined for dynamic effects of wind."
+        text: "(Page 48, clause 7.1, fourth and fifth line) - Substitute 'satisfies' for 'does not satisfy'."
+        explanation: "Any building or structure which satisfies either of the two criteria of 7.1 shall be examined for dynamic effects of wind."
       - amends: [Cl. C-1]
-        text: "(Page 55, clause C-1, second line) - Substitute 'and' for 'add' (the topographic influence extends 1.5 Le upwind and 2.5 Le downwind of the crest)."
+        text: "(Page 55, clause C-1, second line) - Substitute 'and' for 'add'."
+        explanation: "the topographic influence extends 1.5 Le upwind and 2.5 Le downwind of the crest"
       - amends: [Cl. C-2]
         text: "(Page 56, clause C-2, last line) - Insert ',' between 'crest' and 'relative'."
       - amends: [Fig. 13]
-        text: "(Page 56, Fig. 13A) - Substitute the revised figure: General notations showing the region affected by the topographical feature (1.5 Le upwind, 2.5 Le downwind of the crest), with H and X measured from the crest."
+        text: "(Page 56, Fig. 13A) - Substitute the revised figure:"
+        explanation: "General notations showing the region affected by the topographical feature (1.5 Le upwind, 2.5 Le downwind of the crest), with H and X measured from the crest."
       - amends: [Fig. 13]
-        text: "(Page 56, Fig. 13B) - Substitute 'Hill and Ridge' for 'Cliff and Escarpment' (caption correction)."
+        text: "(Page 56, Fig. 13B) - Substitute 'Hill and Ridge' for 'Cliff and Escarpment'."
+        explanation: "caption correction"
       - amends: [Fig. 13]
-        text: "(Page 56, Fig. 13C) - Substitute 'Cliff and Escarpment' for 'Hill and Ridge' (caption correction)."
+        text: "(Page 56, Fig. 13C) - Substitute 'Cliff and Escarpment' for 'Hill and Ridge'."
+        explanation: "caption correction"
       - amends: [Cl. D-1]
-        text: "(Page 58, clause D-1, eighth line) - Substitute 'm2/s' for 'm2s' (units of kinematic viscosity)."
+        text: "(Page 58, clause D-1, eighth line) - Substitute 'm2/s' for 'm2s'."
+        explanation: "units of kinematic viscosity"
 
   - number: 3
     date: March 2006
@@ -213,6 +227,7 @@ amendments:
       - amends: [Table 1]
         text: "(Page 11, Table 1) - Insert 'permanent walls' at the end of the third item under Class of structure."
       - amends: [Cl. 5.5]
-        text: "(Page 13, clause 5.5) - Substitute the following for the existing clause: '5.5 Cyclonic Wind Velocity - Cyclonic storms form far away from the sea coast and the wind speed reduces gradually as the cyclone storm moves towards inland from the shore. Cyclonic storms generally extend up to about 60 km after striking the coast. For buildings and structures located in cyclone prone areas, reference to be made to IS 15498 : 2004. The enhancement factors for cyclonic wind speed as given in IS 15498 : 2004 shall be taken into consideration.' (This replaces the original clause 5.5 'Off Shore Wind Velocity' and its 1.15 factor.)"
+        text: "(Page 13, clause 5.5) - Substitute the following for the existing clause: '5.5 Cyclonic Wind Velocity - Cyclonic storms form far away from the sea coast and the wind speed reduces gradually as the cyclone storm moves towards inland from the shore. Cyclonic storms generally extend up to about 60 km after striking the coast. For buildings and structures located in cyclone prone areas, reference to be made to IS 15498 : 2004. The enhancement factors for cyclonic wind speed as given in IS 15498 : 2004 shall be taken into consideration.'"
+        explanation: "This replaces the original clause 5.5 'Off Shore Wind Velocity' and its 1.15 factor."
       - amends: [Cl. 8.3]
         text: "(Page 52, clause 8.3) - Substitute 'Vh = hourly mean wind speed at height h' for 'Vh = Vz = hourly mean wind speed at height z'."

@@ -46,6 +46,31 @@ COLUMN_TOLERANCE = 15
 # Sections whose OCR text is replaced by curated content.
 CURATED_SECTIONS = {"Table 1", "Table 2", "Table 28", "Appendix A"}
 
+
+@dataclass(frozen=True)
+class AbsorbedProvision:
+    """A provision whose heading the OCR lost, so its text sits inside another chunk.
+
+    Amendments target it by name ("Table 19"), but no chunk `covers` it, so the
+    amendment would never be attached. The host chunk is found by its own
+    provision (`host`) AND a text signature, because a signature alone is not
+    unique (e.g. the Table 19 formula is also quoted in Cl. 6.2.2.8-6.2.2.10).
+    Each entry was checked against the PDF page (2026-10-08).
+    """
+
+    provision: str   # What amendments call it.
+    host: str        # Provision of the chunk that absorbed it.
+    signature: str   # Regex (case-insensitive) that must match the host chunk's text.
+
+
+ABSORBED_PROVISIONS = [
+    AbsorbedProvision("Table 12", host="Table 11", signature=r"TAB\w*\s+I2\b"),                 # OCR "TABU I2", PDF 28
+    AbsorbedProvision("Table 14", host="Table 13", signature=r"TA\w*\s+14\s+PRESSURE"),         # OCR "TAtWE 14", PDF 30
+    AbsorbedProvision("Table 19", host="Table 17", signature=r"0['.’]785"),                     # P = 0.785 D^2 ..., PDF 36
+    AbsorbedProvision("Table 32", host="Table 31", signature=r"Supercritical\s+Flow\s*\(\s*DV"),  # PDF 51
+    AbsorbedProvision("Fig. 13", host="Appendix C", signature=r"Fig\.?\s*13\b"),                # figure is an image; text cites it
+]
+
 # Clause number (optionally appendix-prefixed, e.g. "C-2.1") followed by a capital letter.
 _CLAUSE = re.compile(r"(?:^|(?<=\s))((?:[A-D]-)?[\dlI]{1,2}(?:\.\d{1,2}){0,4})(\.?)\s+(?=[A-Z(])")
 # Top-level sections are always printed as "1. SCOPE", "5. WIND SPEED AND PRESSURE".
@@ -297,4 +322,23 @@ def parse(pdf_dir: Path) -> list[Chunk]:
                 covers=list(window.keys),
             )
         )
+    _cover_absorbed_provisions(chunks)
     return chunks
+
+
+def _cover_absorbed_provisions(chunks: list[Chunk]) -> None:
+    """Add each OCR-lost provision to the `covers` of the chunk that absorbed it.
+
+    Fails loudly if a host can't be found, so a parser change can never silently
+    detach an amendment again.
+    """
+    for absorbed in ABSORBED_PROVISIONS:
+        hosts = [
+            c for c in chunks
+            if absorbed.host in c.covers and re.search(absorbed.signature, c.text, re.IGNORECASE)
+        ]
+        if not hosts:
+            raise ValueError(f"{absorbed.provision}: no chunk covering {absorbed.host} matches {absorbed.signature!r}")
+        for chunk in hosts:
+            if absorbed.provision not in chunk.covers:
+                chunk.covers.append(absorbed.provision)

@@ -44,13 +44,13 @@ PDFs ─ PyMuPDF ─ per-doc cleaner ─ structure-aware chunker ─ chunks.json
                          ┌─────────────────────────┴─────────────┐
                       BM25 (rank_bm25)                  BGE-small embeddings (numpy)
                          └──────────────┬────────────────────────┘
-                                   RRF fusion → top 6 → sibling expansion → amendment expansion
+                   RRF fusion → top 6 → pin rare identifiers → sibling expansion → amendment expansion
                                         │
-                     prompt with numbered sources [S1..S6], "cite every claim, else say not found"
+                     prompt with numbered sources [S1..Sn], amendments inline, "cite every claim, else say not found"
                                         │
-                     LLM adapter: Ollama (qwen2.5:3b-instruct) │ optional Groq/Gemini key │ retrieval-only
+                     LLM adapter: Ollama (qwen2.5:3b-instruct, temperature 0) │ retrieval-only fallback
                                         │
-                     citation validator (unknown [S#] / uncited sentences flagged)
+                     citation validator (unknown [S#] / uncited sentences / numbers not in the cited source)
                                         │
                               CLI (src.ask --debug) / Streamlit UI
 ```

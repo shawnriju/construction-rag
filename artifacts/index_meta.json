@@ -2,5 +2,5 @@
   "embed_model": "BAAI/bge-small-en-v1.5",
   "num_chunks": 448,
   "dim": 384,
-  "chunks_fingerprint": "56b8346a8877b0e8"
+  "chunks_fingerprint": "6352e69d4ee3170f"
 }
