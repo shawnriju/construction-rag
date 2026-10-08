@@ -1,7 +1,7 @@
 # Construction RAG — Plan
 
 > The design agreed before building. Where the build differed, this file has been updated to match.
-> Live status, per-module notes and open issues are in `progress.md`.
+> Live status, per-module notes and open issues are in `docs/progress.md` (this folder).
 > Revised 2026-10-08 after an external review: scope trimmed (strict split → future work, Streamlit built last), gold set ~30 with more
 > unanswerable questions, small-n reporting rules, stronger training-query filtering, and a staged query generator (§3).
 > Revised again 2026-10-08 before Phase 5: no base-model fallback for the fine-tuned model (§3 Delivery), 2 training questions
@@ -187,8 +187,9 @@ boundary conditions, over-citing) are written up as such. Bootstrap CIs are opti
 
 ```
 README.md            setup + "ask a question" in ≤5 commands
-PLAN.md              this file
-DECISIONS.md         assumptions, rejected alternatives, failure modes, scale path
+docs/PLAN.md         this file
+docs/DECISIONS.md    assumptions, rejected alternatives, failure modes, scale path
+docs/progress.md     build log and hand-off notes
 data/pdfs/           the three source PDFs
 data/curated/        is875.yaml: hand-curated IS 875 tables + amendments
 src/

@@ -1,4 +1,4 @@
-"""Fine-tune bge-small on the corpus question -> passage pairs (PLAN.md section 3).
+"""Fine-tune bge-small on the corpus question -> passage pairs (docs/PLAN.md section 3).
 
 Run in the training venv, on the GPU:
     .venv-train\\Scripts\\activate

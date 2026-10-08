@@ -272,7 +272,7 @@ What that means, in plain words:
 - It doesn't change the final score. The right passage already reached the answer-writing model in 24 of 26 questions either way. Most wrong answers come from that small 3B model misreading passages it did have (for example, picking the wrong cell in a wide table). A bigger model is the obvious next step.
 - When a question isn't covered by the documents, the system almost always says "Not found" (6 of 7 times with the fine-tuned model) instead of making something up.
 
-Full reports: [`eval/results/`](eval/results/). The reasoning behind each decision, and the known limits: [`DECISIONS.md`](DECISIONS.md). The original plan: [`PLAN.md`](PLAN.md).
+Full reports: [`eval/results/`](eval/results/). The reasoning behind each decision, and the known limits: [`docs/DECISIONS.md`](docs/DECISIONS.md). The original plan: [`docs/PLAN.md`](docs/PLAN.md).
 
 ---
 
@@ -340,6 +340,7 @@ The fine-tuning scripts (`finetune/`) need an NVIDIA GPU with CUDA and a separat
 ### Project layout
 
 ```
+docs/             PLAN.md (the original plan), DECISIONS.md (why it's built this way), progress.md (build log)
 data/pdfs/        the three source PDFs
 data/curated/     hand-typed IS 875 tables and amendments, plus today's city names
 src/              the app: PDF reading (ingest/), search, answer writing, citation checks, CLI (ask.py), web page (ui.py)

@@ -7,7 +7,7 @@ Usage:
 
 Without --model the committed index is used. With --model (an HF id or a local path, e.g. the
 fine-tuned embedder) the chunks are embedded with that model in memory (~1 min on CPU), so two
-embedders can be compared without a second index file (PLAN.md section 3, Delivery).
+embedders can be compared without a second index file (docs/PLAN.md section 3, Delivery).
 
 Reports and per-question JSON go to eval/results/ (see eval/retrieval.py and eval/generation.py).
 """

@@ -1,6 +1,6 @@
 """Build (question -> passage, hard negative) training data for the embedder fine-tune.
 
-PLAN.md section 3. Two steps, so the slow LLM part can be resumed and checked first:
+docs/PLAN.md section 3. Two steps, so the slow LLM part can be resumed and checked first:
 
     python -m finetune.make_pairs generate [--limit 30]   # LLM questions per chunk (Ollama)
     python -m finetune.make_pairs filter                  # filters, hard negatives, train/val split

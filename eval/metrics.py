@@ -1,6 +1,6 @@
 """Pure scoring functions for the evaluation (no models, no I/O), so they are easy to test.
 
-Conventions (PLAN.md section 4):
+Conventions (docs/PLAN.md section 4):
   - A question is "found" at rank r if r is the rank of the first retrieved chunk that is
     one of its evidence chunks. Hit@k and MRR use that rank.
   - "Fully supported" means every evidence chunk reaches the LLM (e.g. Table 28 *and* its amendment).
@@ -123,7 +123,7 @@ def wins_losses(
 ) -> WinsLosses:
     """Compare two systems per question: Hit@k decides, the reciprocal rank breaks ties.
 
-    This is the pre-committed rule for the fine-tune (PLAN.md section 3): B ships only if it
+    This is the pre-committed rule for the fine-tune (docs/PLAN.md section 3): B ships only if it
     has more wins than losses on hybrid Hit@5, ties broken by MRR.
     """
     wins, losses, ties = [], [], 0

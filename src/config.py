@@ -49,7 +49,7 @@ MIN_TAIL_TOKENS = 50  # A smaller trailing piece is folded into the previous chu
 # --- Models ------------------------------------------------------------------
 BASE_EMBED_MODEL = "BAAI/bge-small-en-v1.5"
 # The fine-tuned bge-small (finetune/train.py), published on the Hugging Face Hub because it is
-# over GitHub's 100 MB file limit. It shipped under the pre-committed rule (PLAN.md §3).
+# over GitHub's 100 MB file limit. It shipped under the pre-committed rule (docs/PLAN.md §3).
 # Used by `python -m src.index`; at query time the retriever loads the model named in index_meta.json.
 FINETUNED_EMBED_MODEL = "shawnriju/bge-small-construction-rag"
 EMBED_MODEL = os.getenv("EMBED_MODEL", FINETUNED_EMBED_MODEL)
@@ -90,7 +90,7 @@ LLM_CONTEXT_TOKENS = 8192
 # Ollama's health check should fail fast, so a missing server never stalls the CLI.
 LLM_HEALTH_TIMEOUT_SECONDS = 3
 
-# --- Fine-tuning data (finetune/make_pairs.py; PLAN.md section 3) -------------
+# --- Fine-tuning data (finetune/make_pairs.py; docs/PLAN.md section 3) -------------
 QUESTIONS_PER_CHUNK = 2   # Run time depends on the number of chunks (one LLM call each), not on this.
 FINETUNE_SEED = 42
 # A question sharing a run of this many words with its passage is too easy: it teaches string matching.

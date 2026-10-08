@@ -2,7 +2,7 @@
 
 This file explains **why** the project is built the way it is: what was chosen, what was rejected and why, what was assumed and how each assumption was checked, and where the system is expected to fail.
 
-For setup and how to ask a question, see [README.md](README.md). For the original plan, see [PLAN.md](PLAN.md). The full evaluation reports are in [`eval/results/`](eval/results/).
+For setup and how to ask a question, see [README.md](../README.md). For the original plan, see [PLAN.md](PLAN.md). The full evaluation reports are in [`eval/results/`](../eval/results/).
 
 ---
 
@@ -45,9 +45,11 @@ For setup and how to ask a question, see [README.md](README.md). For the origina
 
 **Scope stated plainly:** only the 1987 edition of IS 875 Part 3 with its three amendments. A newer edition exists but isn't in the documents, so the system doesn't describe it, and the README says so.
 
-### Why the Hindi text was skipped
+### Why the Hindi documents and Hindi text were skipped
 
-The CPWD contract is partly bilingual: its index and its register forms (PDF pages 80–95) are mostly Hindi, and some headings are in both languages. The Hindi is stored in an old "legacy" font (Kruti Dev), so when the text is pulled out of the PDF it comes out as **meaningless Latin letters** (for example "ds- yks- fu- fo-"), not real Hindi. Reading it properly would need a font-conversion step or OCR, plus a search model and an answer model that handle Hindi well. The English text already covers the same content, so:
+**The Hindi documents in the corpus were not chosen.** Some of them are image-only scans, so they would need Hindi OCR first. After that, the search model (`bge-small-en`, English only) and the small answer model would also need to handle Hindi well, and a Hindi gold set would need someone who can check answers in Hindi. That is a separate project, not one day. Three English documents of different types already give three different reading problems (clean text, noisy text, and a scan), which is what the task asks to show. The path for Hindi would be: Hindi-capable OCR, a multilingual embedding model (for example `bge-m3` or `multilingual-e5`), a multilingual answer model, and Hindi test questions.
+
+**Hindi text inside the chosen documents.** The CPWD contract is partly bilingual: its index and its register forms (PDF pages 80–95) are mostly Hindi, and some headings are in both languages. The Hindi is stored in an old "legacy" font (Kruti Dev), so when the text is pulled out of the PDF it comes out as **meaningless Latin letters** (for example "ds- yks- fu- fo-"), not real Hindi. Reading it properly would need a font-conversion step or OCR, plus a search model and an answer model that handle Hindi well. The English text already covers the same content, so:
 
 - the Hindi-only pages are skipped,
 - Hindi fragments inside English pages are detected and removed (`looks_like_legacy_hindi` in `src/ingest/text.py`),
@@ -241,7 +243,7 @@ Most of these are writing failures by the small answer model. They're kept visib
 - **Contract formulas** (price escalation 10CA/10CC) don't extract cleanly from the PDF.
 - **Long judgment paragraphs** that quote other cases are split into several "part 1/9, 2/9 ..." chunks.
 - **The low-confidence cutoff (0.51)** was set from only 7 unanswerable questions: it flags 6 of 7 of them and 1 of 26 answerable ones. It's a hint, not a rule.
-- **English only** (see section 1).
+- **English only** (see section 1, "Why the Hindi documents and Hindi text were skipped").
 - **Cities not listed in Appendix A** can only be read off the wind-speed map, which is an image and isn't searched, so the right answer for them is "Not found".
 
 ---

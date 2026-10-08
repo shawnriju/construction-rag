@@ -7,7 +7,7 @@ questions on CPU/GTX 1650. Answers are deterministic (temperature 0, fixed seed)
 Writes `eval/results/generation_<label>.md` (report + every answer for a manual read) and
 `generation_<label>.json` (per-question results).
 
-Scored automatically (PLAN.md section 4):
+Scored automatically (docs/PLAN.md section 4):
   - correct:   answerable -> no abstention and every `must_include` value stated;
                unanswerable -> the answer abstains with the exact not-found phrase.
                Questions without `must_include` are left to the manual review.

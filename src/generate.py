@@ -4,7 +4,7 @@ The LLM is swappable through config (LLM_BACKEND / OLLAMA_MODEL env vars).
 Adding a new backend means writing one class with `available()` and
 `complete()`; nothing else in the pipeline changes.
 
-Prompt design notes (measured on qwen2.5:3b, see progress.md):
+Prompt design notes (measured on qwen2.5:3b, see docs/progress.md):
   * An amendment in a separate source block is easy for a small model to
     miss: it quoted the superseded Table 28 value (1.0) even with an explicit
     "overrides [S2]" note. The amendment text is therefore also placed INSIDE
