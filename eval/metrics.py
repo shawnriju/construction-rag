@@ -10,8 +10,16 @@ Conventions (PLAN.md section 4):
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Iterable, Sequence
+
+from src.cite import NOT_FOUND, numbers_in
+
+_CITATION_MARKER = re.compile(r"\[\s*S\s*\d+[^\]]*\]", re.IGNORECASE)  # [S1], [S1, S3], [S2][S4]
+_MINUS_SIGNS = "-−–"  # hyphen-minus, minus sign, en dash (models use all three)
+_NUMERIC_VALUE = re.compile(rf"[{_MINUS_SIGNS}]?\s*\d[\d.,]*")
+_LEADING_NOISE = re.compile(r"^[\s\"'*>_`]+")  # Quotes, bold or blockquote marks before the phrase.
 
 
 @dataclass(frozen=True)
@@ -59,6 +67,41 @@ def found_in(context_ids: Iterable[str], gold_ids: Iterable[str]) -> bool:
 def fully_supported(context_ids: Iterable[str], gold_ids: Iterable[str]) -> bool:
     """Every evidence chunk is among the chunks sent to the LLM."""
     return set(gold_ids) <= set(context_ids)
+
+
+def is_abstention(answer: str) -> bool:
+    """The answer declines with the exact not-found phrase (the same convention as `src.cite`).
+
+    Only the opening counts: a partial answer that says "not found" about one detail is not an abstention.
+    """
+    opening = _LEADING_NOISE.sub("", answer).lower()
+    return opening.startswith(NOT_FOUND.rstrip(".").lower())
+
+
+def missing_values(answer: str, required: Iterable[str]) -> list[str]:
+    """The required key values that the answer does not state.
+
+    A numeric value is compared as a number (so '12' matches 'twelve' and '1.80' matches '1.8');
+    a negative one must also carry its minus sign (-0.8 is not 0.8 for a pressure coefficient).
+    Anything else must appear as text, ignoring case. Citation markers are removed first,
+    so the '1' in '[S1]' never counts as a stated value.
+    """
+    text = _CITATION_MARKER.sub(" ", answer)
+    stated = numbers_in(text)
+    missing = []
+    for value in required:
+        value = value.strip()
+        if _NUMERIC_VALUE.fullmatch(value):
+            present = numbers_in(value) <= stated
+            if present and value[0] in _MINUS_SIGNS:
+                magnitude = re.escape(value[1:].strip())
+                # Trailing zeros are allowed ("-0.80"), further digits are not ("-0.85").
+                present = re.search(rf"[{_MINUS_SIGNS}]\s*{magnitude}0*(?!\d)", text) is not None
+        else:
+            present = value.lower() in text.lower()
+        if not present:
+            missing.append(value)
+    return missing
 
 
 @dataclass(frozen=True)

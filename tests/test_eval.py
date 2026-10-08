@@ -1,4 +1,4 @@
-"""Evaluation metrics and the retrieval runner (toy retriever: offline, no model)."""
+"""Evaluation metrics and the retrieval evaluation (toy retriever: offline, no model)."""
 
 import json
 
@@ -16,7 +16,7 @@ from eval.metrics import (
     score_threshold,
     wins_losses,
 )
-from eval.run import CONTEXT_CONFIGS, FULL_PIPELINE, evaluate_retrieval, format_report, write_results
+from eval.retrieval import CONTEXT_CONFIGS, FULL_PIPELINE, evaluate_retrieval, format_report, write_results
 from src.cite import NOT_FOUND
 from src.retrieve import Retriever
 from tests.helpers import FakeEmbedder, make_chunk, unit_embeddings

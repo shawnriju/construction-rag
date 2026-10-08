@@ -1,5 +1,11 @@
-# Training (author only). CUDA build for local GPU; install after requirements.txt.
+# Training (author only), in its own venv so the tested runtime venv (.venv, CPU torch) is untouched:
+#   python -m venv .venv-train
+#   .venv-train\Scripts\activate
+#   pip install -r requirements.txt -r requirements-train.txt
+# The "+cu121" pin is required: plain "torch==2.4.1" is already satisfied by the CPU build,
+# so pip would keep it and training would silently run on the CPU. (requirements.txt's
+# "torch==2.4.1" accepts 2.4.1+cu121, so installing both files together does not conflict.)
 --extra-index-url https://download.pytorch.org/whl/cu121
-torch==2.4.1
+torch==2.4.1+cu121
 datasets==3.0.1
 accelerate==1.0.1
