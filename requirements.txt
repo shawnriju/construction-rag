@@ -1,0 +1,12 @@
+# Runtime (reviewer). CPU-only torch keeps the install small.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.4.1
+sentence-transformers==3.2.1
+transformers==4.45.2
+pymupdf==1.24.11
+rank-bm25==0.2.2
+numpy==1.26.4
+requests==2.32.3
+streamlit==1.39.0
+python-dotenv==1.0.1
+pyyaml==6.0.3

@@ -1,0 +1,197 @@
+# Hand-curated content for IS 875 (Part 3):1987.
+#
+# Why this file exists:
+#   * The PDF is a scan. Its OCR text layer garbles every table (e.g.
+#     "TEBRAIN CATEQORY", "1’05" instead of "1.05"), so numeric lookups from
+#     the extracted text are unreliable.
+#   * Amendment No. 3 (PDF p. 67) has no text layer at all, and the OCR of
+#     Amendments 1-2 is badly corrupted ("'-O.8'~or '0.8'").
+#
+# Every entry was transcribed from the page images and checked against the PDF.
+# Tables are kept exactly AS PRINTED in 1987 - corrections live only in the
+# amendment entries, so the retriever's amendment handling is what makes the
+# final answer correct (e.g. Table 28 row 0.2 reads 1.0; Amendment 2 changes it to 1.8).
+#
+# Fields:
+#   section       citation label
+#   title         heading shown with the chunk
+#   pdf_pages     1-based PDF page(s); printed_pages: page label printed on the document
+#   covers        provision ids contained in the entry (for amendment lookup)
+#   amends        (amendments only) provision ids the amendment modifies; [] = global
+#   text          the content (markdown)
+
+tables:
+  - section: Table 1
+    title: Risk coefficients (k1) for different classes of structures in different wind speed zones
+    part: "5.3 Design Wind Speed"
+    pdf_pages: [15]
+    printed_pages: ["11"]
+    covers: [Table 1]
+    text: |
+      Table 1 (clause 5.3.1): risk coefficient (probability factor) k1 for different classes of structures, by mean probable design life and basic wind speed zone Vb (m/s). Values as printed in the 1987 edition.
+
+      | Class of structure | Mean probable design life (years) | k1 for Vb = 33 | 39 | 44 | 47 | 50 | 55 |
+      |---|---|---|---|---|---|---|---|
+      | All general buildings and structures | 50 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 |
+      | Temporary sheds, structures such as those used during construction operations (for example, formwork and falsework), structures during construction stages and boundary walls | 5 | 0.82 | 0.76 | 0.73 | 0.71 | 0.70 | 0.67 |
+      | Buildings and structures presenting a low degree of hazard to life and property in the event of failure, such as isolated towers in wooded areas, farm buildings other than residential buildings | 25 | 0.94 | 0.92 | 0.91 | 0.90 | 0.90 | 0.89 |
+      | Important buildings and structures such as hospitals, communication buildings/towers, power plant structures | 100 | 1.05 | 1.06 | 1.07 | 1.07 | 1.08 | 1.08 |
+
+      See the Note to Table 1 for the basis of k1 and the equation for other design lives and risk levels.
+
+  # The Note is a separate entry so that table + note stay within the
+  # embedding model's 512-token window (the combined text is ~800 tokens).
+  - section: Table 1 (Note)
+    title: Note to Table 1 - basis of the risk coefficient k1 and equation for other design lives and risk levels
+    part: "5.3 Design Wind Speed"
+    pdf_pages: [15]
+    printed_pages: ["11"]
+    covers: [Table 1]
+    text: |
+      NOTE - The factor k1 is based on statistical concepts which take account of the degree of reliability required and period of time in years during which these will be exposure to wind, that is, life of the structure. Whatever wind speed is adopted for design purposes, there is always a probability (however small) that it may be exceeded in a storm of exceptional violence; the greater the period of years over which these will be exposure to the wind, the greater is the probability. Higher return periods ranging from 100 to 1 000 years (implying lower risk level) in association with greater periods of exposure may have to be selected for exceptionally important structures, such as, nuclear power reactors and satellite communication towers. Equation given below may be used in such cases to estimate k1 factors for different periods of exposure and chosen probability of exceedance (risk level). The probability level of 0.63 is normally considered sufficient for design of buildings and structures against wind effects and the values of k1 corresponding to this risk level are given above.
+
+      k1 = X(N,P) / X(50, 0.63) = [A - B * ln{ -(1/N) * ln(1 - PN) }] / (A + 4B)
+      where N = mean probable design life of structure in years; PN = risk level in N consecutive years (probability that the design wind speed is exceeded at least once in N successive years), nominal value = 0.63; X(N,P) = extreme wind speed for given values of N and PN; X(50, 0.63) = extreme wind speed for N = 50 years and PN = 0.63.
+
+      A and B for each basic wind speed zone:
+      | Zone | A | B |
+      |---|---|---|
+      | 33 m/s | 83.2 | 9.2 |
+      | 39 m/s | 84.0 | 14.0 |
+      | 44 m/s | 88.0 | 18.0 |
+      | 47 m/s | 88.0 | 20.5 |
+      | 50 m/s | 88.8 | 22.8 |
+      | 55 m/s | 90.8 | 27.3 |
+
+  - section: Table 2
+    title: k2 factors to obtain design wind speed variation with height in different terrains for different classes of buildings/structures
+    part: "5.3 Design Wind Speed"
+    pdf_pages: [16]
+    printed_pages: ["12"]
+    covers: [Table 2]
+    text: |
+      Table 2 (clause 5.3.2.2): multiplying factor k2 by which the basic wind speed Vb is multiplied to get the design wind speed at height z, for terrain categories 1-4 and building classes A, B, C.
+      Class A: structure/component max dimension < 20 m. Class B: 20-50 m. Class C: > 50 m.
+
+      | Height (m) | Cat 1 A | Cat 1 B | Cat 1 C | Cat 2 A | Cat 2 B | Cat 2 C | Cat 3 A | Cat 3 B | Cat 3 C | Cat 4 A | Cat 4 B | Cat 4 C |
+      |---|---|---|---|---|---|---|---|---|---|---|---|---|
+      | 10  | 1.05 | 1.03 | 0.99 | 1.00 | 0.98 | 0.93 | 0.91 | 0.88 | 0.82 | 0.80 | 0.76 | 0.67 |
+      | 15  | 1.09 | 1.07 | 1.03 | 1.05 | 1.02 | 0.97 | 0.97 | 0.94 | 0.87 | 0.80 | 0.76 | 0.67 |
+      | 20  | 1.12 | 1.10 | 1.06 | 1.07 | 1.05 | 1.00 | 1.01 | 0.98 | 0.91 | 0.80 | 0.76 | 0.67 |
+      | 30  | 1.15 | 1.13 | 1.09 | 1.12 | 1.10 | 1.04 | 1.06 | 1.03 | 0.96 | 0.97 | 0.93 | 0.83 |
+      | 50  | 1.20 | 1.18 | 1.14 | 1.17 | 1.15 | 1.10 | 1.12 | 1.09 | 1.02 | 1.10 | 1.05 | 0.95 |
+      | 100 | 1.26 | 1.24 | 1.20 | 1.24 | 1.22 | 1.17 | 1.20 | 1.17 | 1.10 | 1.20 | 1.15 | 1.05 |
+      | 150 | 1.30 | 1.28 | 1.24 | 1.28 | 1.25 | 1.21 | 1.24 | 1.21 | 1.15 | 1.24 | 1.20 | 1.10 |
+      | 200 | 1.32 | 1.30 | 1.26 | 1.30 | 1.28 | 1.24 | 1.27 | 1.24 | 1.18 | 1.27 | 1.22 | 1.13 |
+      | 250 | 1.34 | 1.32 | 1.28 | 1.32 | 1.31 | 1.26 | 1.29 | 1.26 | 1.20 | 1.28 | 1.24 | 1.16 |
+      | 300 | 1.35 | 1.34 | 1.30 | 1.34 | 1.32 | 1.28 | 1.31 | 1.28 | 1.22 | 1.30 | 1.26 | 1.17 |
+      | 350 | 1.37 | 1.35 | 1.31 | 1.36 | 1.34 | 1.29 | 1.32 | 1.30 | 1.24 | 1.31 | 1.27 | 1.19 |
+      | 400 | 1.38 | 1.36 | 1.32 | 1.37 | 1.35 | 1.30 | 1.34 | 1.31 | 1.25 | 1.32 | 1.28 | 1.20 |
+      | 450 | 1.39 | 1.37 | 1.33 | 1.38 | 1.36 | 1.31 | 1.35 | 1.32 | 1.26 | 1.33 | 1.29 | 1.21 |
+      | 500 | 1.40 | 1.38 | 1.34 | 1.39 | 1.37 | 1.32 | 1.36 | 1.33 | 1.28 | 1.34 | 1.30 | 1.22 |
+
+      NOTE 1 - See 5.3.2.2 for definitions of Class A, Class B and Class C structures.
+      NOTE 2 - Intermediate values may be obtained by linear interpolation, if desired. It is permissible to assume constant wind speed between 2 heights for simplicity.
+
+  - section: Table 28
+    title: Force coefficients for single frames
+    part: "6.3.3 Force Coefficients for Unclad Buildings"
+    pdf_pages: [50]
+    printed_pages: ["46"]
+    covers: [Table 28]
+    text: |
+      Table 28 (clause 6.3.3.3): force coefficients Cf for a single frame, by solidity ratio (phi) and member type. Values as printed in the 1987 edition.
+
+      | Solidity ratio (phi) | Flat-sided members | Circular sections, subcritical flow (D Vd < 6 m2/s) | Circular sections, supercritical flow (D Vd >= 6 m2/s) |
+      |---|---|---|---|
+      | 0.1  | 1.9 | 1.2 | 0.7 |
+      | 0.2  | 1.0 | 1.2 | 0.8 |
+      | 0.3  | 1.7 | 1.2 | 0.8 |
+      | 0.4  | 1.7 | 1.1 | 0.8 |
+      | 0.5  | 1.6 | 1.1 | 0.8 |
+      | 0.75 | 1.6 | 1.5 | 1.4 |
+      | 1.00 | 2.0 | 2.0 | 2.0 |
+
+      Linear interpolation between the values is permitted.
+
+  - section: Appendix A
+    title: Basic wind speed at 10 m height for some important cities/towns
+    part: "Appendices"
+    pdf_pages: [57]
+    printed_pages: ["53"]
+    covers: [Appendix A]
+    text: |
+      Appendix A (clause 5.2): basic wind speed Vb (m/s) at 10 m height, 50-year return period.
+      Agra 47; Ahmadabad 39; Ajmer 47; Almora 47; Amritsar 47; Asansol 47; Aurangabad 39; Bahraich 47; Bangalore 33; Barauni 47; Bareilly 47; Bhatinda 47; Bhilai 39; Bhopal 39; Bhubaneshwar 50; Bhuj 50; Bikaner 47; Bokaro 47; Bombay 44; Calcutta 50; Calicut 39; Chandigarh 47; Coimbatore 39; Cuttack 50; Darbhanga 55; Darjeeling 47; Dehra Dun 47; Delhi 47; Durgapur 47; Gangtok 47; Gauhati 50; Gaya 39; Gorakhpur 47; Hyderabad 44; Imphal 47; Jabalpur 47; Jaipur 47; Jamshedpur 47;
+      Jhansi 47; Jodhpur 47; Kanpur 47; Kohima 44; Kurnool 39; Lakshadweep 39; Lucknow 47; Ludhiana 47; Madras 50; Madurai 39; Mandi 39; Mangalore 39; Moradabad 47; Mysore 33; Nagpur 44; Nainital 47; Nasik 39; Nellore 50; Panjim 39; Patiala 47; Patna 47; Pondicherry 50; Port Blair 44; Pune 39; Raipur 39; Rajkot 39; Ranchi 39; Roorkee 39; Rourkela 39; Simla 39; Srinagar 39; Surat 44; Tiruchchirrappalli 47; Trivandrum 39; Udaipur 47; Vadodara 44; Varanasi 47; Vijaywada 50; Visakhapatnam 50.
+      [Curator note, not part of the standard: the 1987 names correspond to today's Mumbai (Bombay), Kolkata (Calcutta), Chennai (Madras), Bengaluru (Bangalore), Guwahati (Gauhati), Shimla (Simla), Thiruvananthapuram (Trivandrum), Vijayawada (Vijaywada), Kozhikode (Calicut), Puducherry (Pondicherry), Panaji (Panjim), Bathinda (Bhatinda).]
+
+amendments:
+  - number: 1
+    date: December 1997
+    pdf_pages: [64]
+    items:
+      - amends: [Table 4]
+        text: "(Page 15, Table 4, first column) - Substitute 'h/w >= 6' for 'h/w > infinity'."
+      - amends: [Table 23]
+        text: "(Page 40, Table 23, first column, first row) - Substitute 'See also Appendix D' for 'See also Appendix C'."
+      - amends: [Table 32]
+        text: "(Page 47, Table 32, col 2) - Substitute 'DVd >= 6 m2/s' for 'DVd <= 6 m2/s' (supercritical flow column heading)."
+
+  - number: 2
+    date: March 2002
+    pdf_pages: [65, 66]
+    items:
+      - amends: []
+        text: "Substitute 'Vz' for 'Vd' at all places (the design wind velocity is Vz throughout the standard)."
+      - amends: [Table 5, Table 6, Table 7, Table 8]
+        text: "(Tables 5, 6, 7 and 8) - Insert the following Note at the end of each table: 'NOTE - W and L are overall length and width including overhangs, w and l are dimensions between the walls excluding overhangs.'"
+      - amends: [Table 9, Table 10, Table 11, Table 12, Table 13, Table 14]
+        text: "(Tables 9, 10, 11, 12, 13 and 14, first column) - Substitute 'for all values of theta' in the last row for the specific values of theta given therein."
+      - amends: [Cl. 6.2.2.7]
+        text: "(Page 27, clause 6.2.2.7(a)) - Insert at the end 'downwards'. Clause 6.2.2.7(a) on overhanging roofs then reads: 1.25 if the overhanging slopes downwards."
+      - amends: [Cl. 6.2.2.8]
+        text: "(Page 27, clause 6.2.2.8(a)) - Substitute '-0.8' for '0.8'. For open-ended cylinders the internal pressure coefficient Cpi is -0.8 where h/D is not less than 0.3."
+      - amends: [Cl. 6.2.2.8]
+        text: "(Page 27, clause 6.2.2.8(b)) - Substitute '-0.5' for '0.5'. For open-ended cylinders the internal pressure coefficient Cpi is -0.5 where h/D is less than 0.3."
+      - amends: [Cl. 6.2.2.9]
+        text: "(Page 27, clause 6.2.2.9) - Substitute 'P = 0.785 D^2 (Cpi - Cpe) pd' for the existing formula for the total resultant load on the roof of a cylindrical elevated structure."
+      - amends: [Table 19]
+        text: "(Page 32, Table 19) - Substitute 'P = 0.785 D^2 (Cpi - Cpe) pd' for the existing formula."
+      - amends: [Table 27]
+        text: "(Page 46, Table 27, third row) - Substitute 'DVd < 6 m2/s' for the existing."
+      - amends: [Table 28]
+        text: "(Page 46, Table 28, col 2, second row) - Substitute '1.8' for '1.0'. The force coefficient for flat-sided members of a single frame with solidity ratio 0.2 is therefore 1.8, not 1.0."
+      - amends: [Cl. 6.3.3.3]
+        text: "(Page 46, clause 6.3.3.3, formula, last line) - Substitute 'gamma = (Area of the frame in a supercritical flow) / Ae' for the existing."
+      - amends: [Cl. 7.1]
+        text: "(Page 47, clause 7.1(a), third line) - Substitute 'or' for 'and'. Buildings and structures with a height to minimum lateral dimension ratio of more than about 5.0, OR ..."
+      - amends: [Cl. 7.1]
+        text: "(Page 48, clause 7.1(b), first line) - Delete 'closed'."
+      - amends: [Cl. 7.1]
+        text: "(Page 48, clause 7.1, fourth and fifth line) - Substitute 'satisfies' for 'does not satisfy'. Any building or structure which satisfies either of the two criteria of 7.1 shall be examined for dynamic effects of wind."
+      - amends: [Cl. C-1]
+        text: "(Page 55, clause C-1, second line) - Substitute 'and' for 'add' (the topographic influence extends 1.5 Le upwind and 2.5 Le downwind of the crest)."
+      - amends: [Cl. C-2]
+        text: "(Page 56, clause C-2, last line) - Insert ',' between 'crest' and 'relative'."
+      - amends: [Fig. 13]
+        text: "(Page 56, Fig. 13A) - Substitute the revised figure: General notations showing the region affected by the topographical feature (1.5 Le upwind, 2.5 Le downwind of the crest), with H and X measured from the crest."
+      - amends: [Fig. 13]
+        text: "(Page 56, Fig. 13B) - Substitute 'Hill and Ridge' for 'Cliff and Escarpment' (caption correction)."
+      - amends: [Fig. 13]
+        text: "(Page 56, Fig. 13C) - Substitute 'Cliff and Escarpment' for 'Hill and Ridge' (caption correction)."
+      - amends: [Cl. D-1]
+        text: "(Page 58, clause D-1, eighth line) - Substitute 'm2/s' for 'm2s' (units of kinematic viscosity)."
+
+  - number: 3
+    date: March 2006
+    pdf_pages: [67]
+    items:
+      - amends: [Cl. 5.3]
+        text: "(Page 8, clause 5.3, Note) - Insert at the end: 'For buildings and structures located in cyclone prone areas reference may be made to IS 15498 : 2004 Guidelines for improving the cyclonic resistance of low rise houses and other buildings/structures.'"
+      - amends: [Table 1]
+        text: "(Page 11, Table 1) - Insert 'permanent walls' at the end of the third item under Class of structure."
+      - amends: [Cl. 5.5]
+        text: "(Page 13, clause 5.5) - Substitute the following for the existing clause: '5.5 Cyclonic Wind Velocity - Cyclonic storms form far away from the sea coast and the wind speed reduces gradually as the cyclone storm moves towards inland from the shore. Cyclonic storms generally extend up to about 60 km after striking the coast. For buildings and structures located in cyclone prone areas, reference to be made to IS 15498 : 2004. The enhancement factors for cyclonic wind speed as given in IS 15498 : 2004 shall be taken into consideration.' (This replaces the original clause 5.5 'Off Shore Wind Velocity' and its 1.15 factor.)"
+      - amends: [Cl. 8.3]
+        text: "(Page 52, clause 8.3) - Substitute 'Vh = hourly mean wind speed at height h' for 'Vh = Vz = hourly mean wind speed at height z'."

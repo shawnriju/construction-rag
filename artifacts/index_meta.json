@@ -1,0 +1,6 @@
+{
+  "embed_model": "BAAI/bge-small-en-v1.5",
+  "num_chunks": 454,
+  "dim": 384,
+  "chunks_fingerprint": "56376811b52c350b"
+}

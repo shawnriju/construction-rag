@@ -1,0 +1,25 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Secrets and local settings
+.env
+.streamlit/secrets.toml
+
+# Large or machine-specific outputs (the fine-tuned model goes to the HF Hub instead)
+artifacts/models/
+finetune/output/
+*.log
+
+# Editor and OS files
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Working notes not meant for the submission
+docs/prior-plans/

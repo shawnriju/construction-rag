@@ -1,0 +1,5 @@
+# Training (author only). CUDA build for local GPU; install after requirements.txt.
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.4.1
+datasets==3.0.1
+accelerate==1.0.1
