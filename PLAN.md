@@ -8,7 +8,8 @@
 > per chunk with a small trial first (§3 Data), and a gold set that mixes natural and document wording, is scored as both
 > "found" and "fully supported", and locates every gold passage by id, page and quote (§4).
 > Status 2026-10-08: steps 1-6 of §7 built and measured (results in eval/results/ and progress.md §11);
-> the fine-tuned embedder won under the pre-committed rule and ships via the Hugging Face Hub (user decision).
+> the fine-tuned embedder won under the pre-committed rule and ships via the Hugging Face Hub (user decision):
+> `shawnriju/bge-small-construction-rag`, committed index rebuilt with it, low-confidence cutoff 0.51.
 
 A small, cited RAG over three Indian construction documents of different types, plus a fine-tuned
 retrieval embedder. Scope target: about one day of work. This is an interview demo, not a production system.
@@ -136,7 +137,7 @@ question: fixed 4, broke 2 (both only slipped one place inside the top 5), no am
 vocabulary misses moved up (rank 38 → 24, 40 → 22) but stay outside the top 6, so what reaches the LLM is unchanged
 (24/26 found, 22/26 fully supported). The cosine scale spread out: low-confidence cutoff 0.55 → ~0.51.
 
-**Delivery:** the fine-tuned model goes to a free Hugging Face Hub repo and downloads automatically. The committed index is rebuilt with
+**Delivery:** the fine-tuned model goes to a free Hugging Face Hub repo (`shawnriju/bge-small-construction-rag`) and downloads automatically. The committed index is rebuilt with
 whichever model ships (`python -m src.index --model ...`); `index_meta.json` records that model and the app loads it, so the vectors
 and the model always match. There is **no fallback to the base model** (its vectors would not match the index): if the download
 fails, the app stops with a clear message. For the base-vs-fine-tuned comparison, the eval embeds the chunks with each model in
@@ -232,7 +233,7 @@ As built, steps 1–3 were done together (all three parsers + curated content be
 4. Dense + RRF + `--debug`; Ollama generation + citation validator + retrieval-only fallback.
 5. Gold set drafted, verified by you, baselines run. ✅
 6. Synthetic pairs (qwen first; Groq if needed, see §3) → fine-tune → transductive protocol → ablation table. ✅ (qwen passed
-   the checkpoint; Groq not needed). Remaining: HF Hub upload, switch the index, answer re-eval.
+   the checkpoint; Groq not needed). HF Hub upload and index switch done. Remaining: answer re-eval.
 7. Streamlit UI.
 8. README, DECISIONS.md (incl. an "expected failure modes" section and why the Hindi documents were skipped), HF Hub upload, clean-machine test.
 Future work (DECISIONS.md): strict hold-out split for the fine-tune.

@@ -57,7 +57,7 @@ Answerable: min 0.485, median 0.610. Unanswerable: min 0.370, max 0.626.
 
 | Cutoff | unanswerable flagged (want all) | answerable flagged (want none) |
 |---|---|---|
-| current (0.55) | 6/7 (86%) | 6/26 (23%) |
+| current (0.51) | 6/7 (86%) | 1/26 (4%) |
 | best on this set (0.507) | 6/7 (86%) | 1/26 (4%) |
 
 Unanswerable questions: none-01 0.500, none-02 0.626, none-03 0.493, none-04 0.394, none-05 0.449, none-06 0.408, none-07 0.370

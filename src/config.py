@@ -48,8 +48,11 @@ MIN_TAIL_TOKENS = 50  # A smaller trailing piece is folded into the previous chu
 
 # --- Models ------------------------------------------------------------------
 BASE_EMBED_MODEL = "BAAI/bge-small-en-v1.5"
-# Set EMBED_MODEL to the fine-tuned Hugging Face repo id once it exists.
-EMBED_MODEL = os.getenv("EMBED_MODEL", BASE_EMBED_MODEL)
+# The fine-tuned bge-small (finetune/train.py), published on the Hugging Face Hub because it is
+# over GitHub's 100 MB file limit. It shipped under the pre-committed rule (PLAN.md §3).
+# Used by `python -m src.index`; at query time the retriever loads the model named in index_meta.json.
+FINETUNED_EMBED_MODEL = "shawnriju/bge-small-construction-rag"
+EMBED_MODEL = os.getenv("EMBED_MODEL", FINETUNED_EMBED_MODEL)
 # BGE models retrieve better when *queries* (not passages) carry this prefix.
 BGE_QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
 
@@ -67,8 +70,9 @@ MAX_SIBLINGS_ATTACHED = 3
 RARE_IDENTIFIER_MAX_CHUNKS = 3
 MAX_PINNED = 2
 # Below this cosine similarity of the best dense hit, results are flagged as
-# low-confidence. Provisional value; calibrated on the gold set's unanswerable questions.
-LOW_CONFIDENCE_COSINE = 0.55
+# low-confidence. Calibrated on the gold set with the fine-tuned model (fine-tuning spread
+# the cosine scale): flags 6/7 unanswerable and 1/26 answerable questions. Was 0.55 for the base model.
+LOW_CONFIDENCE_COSINE = 0.51
 
 # --- Generation --------------------------------------------------------------
 LLM_BACKEND = os.getenv("LLM_BACKEND", "ollama")  # "ollama" | "none"

@@ -123,7 +123,15 @@ class Retriever:
         meta = json.loads(INDEX_META_PATH.read_text(encoding="utf-8"))
         if meta["chunks_fingerprint"] != chunks_fingerprint(chunks):
             raise RuntimeError("Embeddings are out of date with chunks.jsonl. Run: python -m src.index")
-        model = SentenceTransformer(meta["embed_model"], device="cpu")
+        # No fallback to another model: the stored vectors only match the model that made them.
+        try:
+            model = SentenceTransformer(meta["embed_model"], device="cpu")
+        except OSError as error:
+            raise RuntimeError(
+                f"Could not load the embedding model '{meta['embed_model']}' that built the index. "
+                "The first run downloads it from the Hugging Face Hub (~130 MB): check the internet "
+                f"connection and try again. ({error})"
+            ) from error
         return cls(chunks, np.load(EMBEDDINGS_PATH), model)
 
     # -- single retrievers --

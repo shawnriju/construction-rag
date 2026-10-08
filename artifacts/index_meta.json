@@ -1,5 +1,5 @@
 {
-  "embed_model": "BAAI/bge-small-en-v1.5",
+  "embed_model": "shawnriju/bge-small-construction-rag",
   "num_chunks": 448,
   "dim": 384,
   "chunks_fingerprint": "6352e69d4ee3170f"
