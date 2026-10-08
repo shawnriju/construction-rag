@@ -2,6 +2,8 @@
 
 > The design agreed before building. Where the build differed, this file has been updated to match.
 > Live status, per-module notes and open issues are in `progress.md`.
+> Revised 2026-10-08 after an external review: scope trimmed (strict split → future work, Streamlit built last), gold set ~30 with more
+> unanswerable questions, small-n reporting rules, stronger training-query filtering, and a staged query generator (§3).
 
 A small, cited RAG over three Indian construction documents of different types, plus a fine-tuned
 retrieval embedder. Scope target: about one day of work. This is an interview demo, not a production system.
@@ -63,36 +65,68 @@ PDFs ─ PyMuPDF ─ per-doc cleaner ─ structure-aware chunker ─ chunks.json
 | Reranker | **Optional, off by default** | Only if time allows; measured in the ablation |
 | LLM | Ollama qwen2.5:3b-instruct, swapped via env var | Free and local; fits a 4 GB GPU or runs on CPU |
 | Abstention | Best dense cosine below a threshold → low-confidence warning; LLM told to say "Not found in the provided documents."; threshold calibrated on unanswerable gold questions | "Not in the provided documents" |
-| UI | Streamlit + CLI | Answer, source cards (doc, clause/¶, both pages, snippet) |
+| UI | CLI + Streamlit, **Streamlit built last** (after eval and fine-tuning) | The CLI answers "how to ask a question"; Streamlit is for the demo |
 
 ## 3. Fine-tuning element: domain-adapted retrieval embedder
 
-**Decision:** fine-tune `bge-small-en-v1.5` on corpus-specific (query → passage) pairs with hard negatives.
+**Decision:** fine-tune `bge-small-en-v1.5` (the model that turns text into vectors for meaning-based search)
+on (question → passage) pairs from this corpus.
 
-**Why this instead of LoRA on the generator:** retrieval sets the ceiling for RAG quality, and an embedder
-fine-tune has an objective before/after metric (Recall@k, MRR). It also trains in minutes on a GTX 1650.
-A generator LoRA is hard to evaluate and risks confident, ungrounded answers.
+**In plain words (the interview version).** The base embedder learned "what text means" from general web data.
+It has never seen how Indian contracts, judgments and wind-load standards phrase things ("Engineer-in-Charge",
+"patent illegality", "k2 factor"). We show it a few thousand examples of *"this question is answered by this
+passage, and not by that similar-looking one"*. Training pulls each question's vector towards its passage and
+pushes it away from the wrong ones. Then we check, on questions it has never seen, whether the right passage now
+ranks higher. Training is about 50 lines of standard `sentence-transformers` code and takes minutes on the GTX 1650.
 
-- **Data:** about 150–300 synthetic queries (2 per chunk) from qwen2.5:3b. Filters: drop near-duplicates,
-  drop queries that copy a long n-gram from the chunk, and drop queries whose positive isn't in BM25+dense top-50.
-- **Hard negatives:** sibling/adjacent clauses (10CA vs 10CC, 5.3.1 vs 5.3.2, neighbouring ¶s) and BM25 near-misses.
-- **Training:** sentence-transformers, `MultipleNegativesRankingLoss` with explicit hard negatives, lr ~1e-5 to 2e-5,
-  1–3 epochs, small validation split. Run locally on CUDA (`requirements-train.txt`).
-- **Protocol (both are reported):**
-  1. *Transductive:* train on synthetic queries over all chunks and evaluate on human gold questions.
-     This mirrors production, where you adapt to the corpus you serve. Only the query wording is unseen.
-  2. *Strict:* hold out ~20% of sections entirely (no training queries) and report gold questions on those sections only.
-     This measures generalisation. The sample is small, so the result is labelled as noisy.
-- **Pre-committed rule:** ship whichever embedder wins on the held-out gold set. If the fine-tune doesn't help,
-  ship the base model and report that honestly.
-- **Delivery:** the fine-tuned model goes to a free Hugging Face Hub repo and downloads automatically. If that fails, the app uses the base model.
+**Why this and not something else:**
+- *vs LoRA on the generator:* retrieval sets the ceiling for RAG quality (the LLM can't cite a passage it never
+  received), and retrieval has an objective before/after metric (Recall@k, MRR). A generator LoRA is hard to
+  evaluate and risks confident, ungrounded answers.
+- *vs a classifier (e.g. "which document is this question about?"):* simpler, but with three documents BM25 already
+  routes most questions correctly, so it would barely change the answers.
+
+**Assumptions, and how each is checked (not just assumed):**
+
+| # | Assumption | How we check it |
+|---|---|---|
+| A1 | Retrieval has room to improve (if the base hybrid already finds every gold passage, fine-tuning can't show a gain) | Baseline eval first: look at hybrid **and dense-only** R@1/R@5. If hybrid R@5 is near 100%, say so and focus the claim on dense-only and R@1 |
+| A2 | A 3B local model can write useful training questions | Checkpoint before training: filter pass rate + a manual read of ~20 questions. Groq only if this fails (§3, staged generator) |
+| A3 | Training questions don't leak the test | Gold set frozen before any training; drop training questions too similar to any gold question |
+| A4 | "Wrong" passages used in training really are wrong | Hard negatives never come from the same section or table as the positive (avoids teaching "Clause 10CC part 2 is irrelevant to a Clause 10CC question") |
+| A5 | A gain is real, not luck | Per-question wins/losses (n ≈ 30), fixed random seed, no "improves" claim from a 1–2 question gap |
+
+**Data.** 3–4 questions per chunk from **qwen2.5:3b** (~1,300+ candidates from 448 chunks), filtered: near-duplicates;
+questions that copy a long phrase from the chunk (too easy, teaches string matching); questions whose passage isn't in
+the BM25+dense top 50 (probably a bad question); questions too similar to a gold question (leak guard). Groq is not set up
+now; it is considered only if the A2 checkpoint fails or the fine-tune shows no gain. If both runs happen, both are reported.
+
+**Hard negatives (kept simple):** for each question, 1 passage from the BM25 top 10 that is *not* from the positive's
+section or table. These are the near-misses (10CA vs 10CC, neighbouring ¶s), which is exactly what the model must learn to separate.
+
+**Training:** `MultipleNegativesRankingLoss` (each question is also contrasted with every other passage in the batch,
+for free), lr ~2e-5, 1–3 epochs, fixed seed, 10% of the training questions held back as a validation split to catch
+overfitting. Runs locally on CUDA (`requirements-train.txt`); the reviewer's install stays CPU-only.
+
+**Protocol: transductive.** Train on questions over all chunks; test on the human gold questions (new wording, same
+documents). This matches the task (a RAG bot over *these* documents) and is reported as **corpus adaptation, not
+generalisation to new documents**. A strict hold-out split (sections never seen in training) is **future work**: with
+~30 gold questions it would leave ~6 to measure on, too few to mean anything.
+
+**Pre-committed success rule (fixed before training):** compare base vs fine-tuned on the frozen gold set, both dense-only
+and hybrid. The fine-tuned model **ships only if** it has more per-question wins than losses on hybrid hit@5 (ties broken by
+MRR) **and** breaks no amendment-sensitive question. Otherwise the base model ships, and the result is reported honestly.
+The low-confidence threshold is recalibrated for whichever model ships, because fine-tuning changes the similarity scale.
+
+**Delivery:** the fine-tuned model goes to a free Hugging Face Hub repo and downloads automatically. If that fails, the app uses the base model.
 
 ## 4. Evaluation
 
-**Gold set** (`eval/gold.jsonl`, about 36 questions, drafted by Claude and **each verified by hand against the PDF page**):
-10 per document, 3 cross-document (e.g. CPWD 10CA/10CC escalation vs the Ssangyong price-adjustment dispute),
-and 3 unanswerable or amendment-sensitive. Each record: `question, gold_chunk_ids, answer_key, type, doc`.
-Synthetic training queries are **never** used for evaluation.
+**Gold set** (`eval/gold.jsonl`, about 30 questions, drafted by Claude and **each verified by hand against the PDF page**):
+about 7 per document, a few amendment-sensitive (Table 28 φ=0.2, Cl. 5.5), 2–3 cross-document (e.g. CPWD 10CA/10CC
+escalation vs the Ssangyong price-adjustment dispute; **the first to cut**), and **6–8 unanswerable** (enough to set
+the low-confidence threshold, which is otherwise only a rough heuristic). Each record: `question, gold_chunk_ids, answer_key, type, doc`.
+Synthetic training queries are **never** used for evaluation. **The gold set is frozen before any fine-tuning run.**
 
 **Retrieval ablation:** Recall@1/5/10 and MRR, broken down by doc and question type:
 
@@ -101,13 +135,15 @@ Synthetic training queries are **never** used for evaluation.
 | BM25 | | | |
 | Dense (base) | | | |
 | Hybrid (base) | | | |
-| Hybrid (fine-tuned), transductive | | | |
-| Hybrid (fine-tuned), strict split | | | |
+| Dense (fine-tuned) | | | |
+| Hybrid (fine-tuned) | | | |
 | (+ reranker, if built) | | | |
 
 **Generation:** answer correctness (exact match on numeric questions, manual check otherwise), citation correctness
 (the cited chunk supports the claim), and abstention accuracy. Plus a manual review of about 15 answers.
-The numbers are indicative only because n≈36. Bootstrap CIs are optional.
+**Reporting with a small n (≈30):** counts next to every percentage ("22/30"), and **per-question wins/losses** between
+two systems ("fine-tune fixed 4, broke 1") rather than a claim of "improves" from a 2-point gap. Retrieval quality and
+generation quality are reported separately; the 3B generator is the swappable weak link. Bootstrap CIs are optional.
 
 ## 5. Repo layout
 
@@ -123,11 +159,11 @@ src/
   ingest/            pdf.py, text.py (shared), cpwd.py, ssangyong.py, is875.py, curated.py, build.py
   index.py           embeddings → artifacts/ (BM25 is rebuilt at load, not persisted)
   retrieve.py        Retriever: bm25, dense, hybrid(RRF), amendment expansion
-  generate.py        LLM adapter (ollama | groq | none), prompt
+  generate.py        LLM adapter (ollama | none), prompt; a groq backend only if needed later (§3)
   cite.py            citation validator
   pipeline.py        retrieve → generate → validate (shared by CLI and UI)
   ask.py             CLI (--debug prints BM25/dense/RRF rankings)
-  ui.py              Streamlit
+  ui.py              Streamlit (built last)
 finetune/            make_pairs.py, train.py
 eval/                gold.jsonl, run.py, report.md, compare_chunking.py (before/after check for the chunking fix)
 artifacts/           chunks.jsonl, embeddings.npy, index_meta.json  (prebuilt, committed)
@@ -158,10 +194,12 @@ As built, steps 1–3 were done together (all three parsers + curated content be
 3. Ssangyong + IS 875 chunkers, curated tables, amendment metadata.
 4. Dense + RRF + `--debug`; Ollama generation + citation validator + retrieval-only fallback.
 5. Gold set drafted, verified by you, baselines run.
-6. Synthetic pairs → fine-tune → both protocols → ablation table.
-7. Streamlit UI, README, DECISIONS.md, HF Hub upload, clean-machine test.
+6. Synthetic pairs (qwen first; Groq if needed, see §3) → fine-tune → transductive protocol → ablation table.
+7. Streamlit UI.
+8. README, DECISIONS.md (incl. an "expected failure modes" section and why the Hindi documents were skipped), HF Hub upload, clean-machine test.
+Future work (DECISIONS.md): strict hold-out split for the fine-tune.
 
-**If time runs short, cut in this order:** reranker → UI polish → strict-split protocol.
+**If time runs short, cut in this order:** reranker → cross-document gold questions → Streamlit polish (a basic UI stays).
 **Never cut:** eval, amendment handling, clean-machine test.
 
 ## 8. Explicitly out of scope

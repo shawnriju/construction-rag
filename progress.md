@@ -4,7 +4,7 @@
 > to continue. It is also the author's own record of what was built, how, and why.
 > **Keep it updated** after every coding change: update "Current status" and "Next steps", and add any new decisions.
 
-_Last updated: 2026-10-08 (Phases 0–2 done and pushed as the first commit; token-based chunking fix + sibling expansion done, awaiting user test + commit; Phase 3 code written but not yet run)_
+_Last updated: 2026-10-08 (Phases 0–2 done and pushed as the first commit; token-based chunking fix + sibling expansion done and tested by the user; plan revised after an external review (§5a); Phase 3 code written but not yet run)_
 
 ---
 
@@ -61,27 +61,34 @@ Prior planning notes are in `docs/prior-plans/` (Claude's initial plan, GPT's re
 
 | Topic | Decision | Why / trade-off |
 |---|---|---|
-| LLM for answers | **Ollama `qwen2.5:3b-instruct`** by default; **retrieval-only fallback** if Ollama isn't running; backend swappable via env var | Free and local. The demo never hard-fails. A free hosted key (Groq/Gemini) is an optional future add-on. |
+| LLM for answers | **Ollama `qwen2.5:3b-instruct`** by default; **retrieval-only fallback** if Ollama isn't running; backend swappable via env var. **No Groq for now** (user decision): a Groq backend is added only if the qwen-generated training queries turn out too weak (see Training data) | Free and local. The demo never hard-fails. The reviewer never needs a key. |
 | Delivery | **GitHub repo** (code + prebuilt chunks/index). **Fine-tuned model goes on Hugging Face Hub** and downloads automatically. | The fine-tuned bge-small (~130 MB) exceeds GitHub's 100 MB file limit. Git LFS was rejected (bandwidth quota). |
 | Docker | **No** | A torch image is several GB, and Ollama inside Docker on Windows adds friction. Plain pip in a clean venv instead. |
-| Interface | **CLI (`--debug` shows rankings) + Streamlit** | The CLI is for transparency and development; Streamlit is for the demo. |
+| Interface | **CLI (`--debug` shows rankings) + Streamlit, Streamlit built last** (user decision: keep it, after eval + fine-tuning) | The CLI answers "how to ask a question"; Streamlit is for the demo. |
 | Retrieval | **Hybrid BM25 + dense (`BAAI/bge-small-en-v1.5`), fused with RRF (k=60)** | The corpus is full of exact identifiers (Clause 10CC, Table 28, s.34(2)(a)(iii)), which BM25 handles; paraphrased questions need dense retrieval. RRF needs no score calibration. |
 | Chunk size | **≤400 tokens of body, counted with bge-small's own tokenizer** (was 300 *words*); build fails if any embedded text (breadcrumb + body) > 512 tokens; over-long curated tables are split into parts that repeat the header | Numbers/symbols/OCR cost up to ~3 tokens per word ("0.85" = 3 tokens), so the word limit let 11 chunks overflow the 512-token window and the embedder silently dropped their tails. Done before the gold set because it renames chunk ids. 400 ≈ the old prose size, so prose granularity stays about the same. |
 | Vector store | numpy matrix + JSONL behind a `Retriever` class | Only about 450 chunks, so no vector DB is needed. Swapping to Qdrant/pgvector is a one-file change. |
 | Reranker | **Optional, off.** Only if time allows (measured in the ablation). | Not needed for the story. |
 | Fine-tuning element | **Fine-tune the bge-small embedder** on corpus question→passage pairs with **hard negatives** (sibling clauses, BM25 near-misses) | Retrieval sets the RAG ceiling. It has an objective before/after metric (Recall@k, MRR) and trains in minutes on the GTX 1650. A generator LoRA was rejected: hard to evaluate, and it risks confident ungrounded answers. |
-| Training data | **LLM-synthetic queries** (qwen2.5:3b, ~2 per chunk, ~150–300 pairs), filtered (dedupe, no copied n-grams, positive must be retrievable in the top 50) | Fast. **Gold eval questions are never synthetic.** |
+| Training data | **LLM-synthetic queries, 3–4 per chunk** (~1,300+ candidates), filtered hard (dedupe, no copied n-grams, positive retrievable in the top 50, **no query too similar to a gold question**). **Staged generator:** qwen2.5:3b first; checkpoint = filter pass rate + manual read of ~20 queries; if the queries are generic or the fine-tune shows no gain, regenerate with **Groq (free tier)** and retrain, and report both runs. | **Gold eval questions are never synthetic.** No up-front Groq decision is needed: the generator goes through the same LLM adapter, so switching is an env var. |
 | Training location | Local GTX 1650 (`requirements-train.txt`) | The reviewer's install stays CPU-only. |
-| Eval protocol | **Report both:** (1) *transductive*: train on synthetic queries over all chunks, test on human gold questions; (2) *strict*: hold out ~20% of sections entirely | Pre-empts "you memorised the chunks". The strict split is small and noisy, and is labelled as such. Rule: **ship whichever embedder wins; if fine-tuning doesn't help, ship the base model and say so.** |
-| Gold set | ~36 questions (10 per doc, 3 cross-doc, 3 unanswerable/amendment-sensitive). **Claude drafts them with gold clause/¶/page; the user verifies each against the PDF.** | Defensible in the interview. |
+| Eval protocol | **Transductive (main):** train on synthetic queries over all chunks, test on human gold questions; written up as *corpus adaptation, not generalisation*. **Strict split (hold out ~20% of sections): future work** (user decision); not built. | With ~30 gold questions, a 20% hold-out leaves ~6, which is too few to mean anything. Rule: **ship whichever embedder wins; if fine-tuning doesn't help, ship the base model and say so.** |
+| Gold set | **~30 questions**: ~7 per doc, a few amendment-sensitive, 2–3 cross-doc (first to cut), **6–8 unanswerable** (to set the low-confidence threshold). **Frozen before any fine-tuning run.** **Claude drafts them with gold clause/¶/page; the user verifies each against the PDF.** Reporting: counts next to percentages, per-question wins/losses between systems, retrieval and generation reported separately. | Defensible in the interview; with a small n, no "improves" claim from a 1–2 question gap. |
 | IS 875 tables | **Hand-curate 4:** Table 1 (k1 risk coefficients, + its Note as a separate entry), Table 2 (k2), Table 28 (single-frame force coefficients), Appendix A (city wind speeds) | OCR tables are unusable. Tables 1 and 2 together with Vb give the core formula Vz = Vb·k1·k2·k3. Every value was checked against the rendered page image. Hand-curation doesn't scale; the scale path is a layout/vision OCR model. |
 | Curated tables are kept **exactly as printed** (Table 28 row 0.2 = **1.0**) | Confirmed with the user | Provenance: the citation must match what the page shows. Corrections live only in amendment chunks, so the amendment handling is what makes the answer right (1.8). This is tested explicitly in the eval (see §11). |
 | Split tables → **sibling expansion** ("small-to-big") | A curated table split into parts (Table 2 ×4, Appendix A ×2) is *searched* part by part but *handed to the LLM whole*: when any part is retrieved, `retrieve.py` attaches the missing parts (own budget, `MAX_SIBLINGS_ATTACHED = 3`, so they never crowd out amendments). Curated tables only; OCR table parts are noisy and are left alone. | Dense search can't tell rows apart by number, and an interpolation question needs rows from two parts (e.g. 225 m needs the 200 m row in part 2 and the 250 m row in part 3). Measured: without it, 15/16 table probes get the needed rows into context; with it, 16/16. Cost: ~0.9 extra chunks per question on average (7.0 → 7.9). This is a standard RAG pattern (parent-document retrieval) and a good interview point. |
 | Amendments | Curated **per item**, with `is_amendment=True` and `amends=[...]`. Retrieval attaches them **in code** (not only in the prompt). | A naive RAG would quote superseded text. This is the strongest point of the project's story. |
-| Scope cuts if late | Cut the reranker, then UI polish, then the strict split. **Never cut** eval, amendment handling, or the clean-machine test. | |
+| Scope cuts if late | Cut the reranker, then the cross-doc questions, then Streamlit polish (a basic UI stays). **Never cut** eval, amendment handling, or the clean-machine test. | |
 | Out of scope | OCR pipeline, vector DB server, agents, HyDE/query rewriting, generator LoRA, auth, Docker | Described as the "scale path" in DECISIONS.md (to be written). |
 
 Full plan: `PLAN.md`.
+
+### 5a. Plan revision after an external review (2026-10-08)
+Another Claude chat reviewed `PLAN.md`. It found the plan strong on substance and too large for "one day". What we did with each point:
+- **Adopted:** gold set ~30 with 6–8 unanswerable questions; counts + per-question wins/losses instead of "improves" claims; a leak guard between gold and synthetic queries; 3–4 queries per chunk with harder filters; strict split moved to future work; Streamlit kept (user decision) but built last; cross-doc questions first to cut; an "expected failure modes" section and a Hindi-docs note in DECISIONS.md; retrieval and generation reported separately.
+- **Staged instead of decided up front:** the stronger query generator (Groq). **User decision: no Groq now**; it is revisited only if qwen's queries fail the checkpoint or the fine-tune shows no gain. Try qwen2.5:3b first; switch only if the checkpoint or the gold-set result says so. Guard against "trying until it wins": the gold set is frozen first, and if both runs happen, both are reported.
+- **Already handled** (the review was written against the plan, not the build): CPWD cleaner time-box (done), automatic printed-page mapping (done), amendment tests (already planned), simple citation validator (already simple).
+- **Rejected:** Git LFS / committing the model as a fallback for HF Hub (LFS bandwidth quota; the model is ~130 MB, over GitHub's 100 MB file limit). The existing fallback (use the base model if the download fails) is enough. Backup idea: save the fine-tuned model in fp16 (~67 MB).
 
 ## 6. Architecture (as built)
 
@@ -172,7 +179,7 @@ finetune/ (empty package, planned)   eval/compare_chunking.py (before/after chec
 |---|---|
 | 0. Planning, scaffold, env | ✅ |
 | 1. Ingestion (448 chunks: cpwd 201, ssangyong 119, is875 128 = 92 OCR + 36 curated) | ✅ built and checked |
-| 1a. Token-based chunking fix (≤512 tokens guaranteed; Table 2 / Appendix A split) + sibling expansion + `eval/compare_chunking.py` | 🟡 **done and measured by Claude; awaiting user test + commit** |
+| 1a. Token-based chunking fix (≤512 tokens guaranteed; Table 2 / Appendix A split) + sibling expansion + `eval/compare_chunking.py` | ✅ **done, measured, and tested by the user (build clean, 11 → 0 truncated, 16/16 table probes, Table 28 + Amd 2 still linked)** |
 | 2. Retrieval (hybrid + amendment expansion) | ✅ built and smoke-tested |
 | 3. Generation (prompt, Ollama, citation check, pipeline) | 🟡 **code written, never executed** |
 | 4. CLI `src/ask.py` (+ `--debug`, `--no-llm`, `--mode`) and Streamlit `src/ui.py` | ⏳ |
@@ -192,12 +199,12 @@ python -m eval.compare_chunking   # before/after vs commit 74f8585 (use --old-re
 
 ## 11. Next steps (in order)
 1. **Phase 3–4 (next):** run the generation path against Ollama for the first time; fix prompt/citation issues. Add the `src/ask.py` CLI (answer + numbered sources + warnings; `--debug` prints the BM25/dense/RRF ranks; `--no-llm`; `--mode`). **Stop for the user to test.**
-1a. ~~Token-overflow fix~~ and ~~sibling expansion~~ done (§5, §8). The user tests and commits them.
-2. Streamlit UI: question box, answer, source cards (doc, clause/¶, both pages, snippet, "attached because…", curated/amendment badges), and a corpus-scope banner ("IS 875-3:1987 with Amd 1–3").
+1a. ~~Token-overflow fix~~ and ~~sibling expansion~~ done (§5, §8). Tested by the user on 2026-10-08.
+2. *(Built last, after step 5; user wants it)* Streamlit UI: question box, answer, source cards (doc, clause/¶, both pages, snippet, "attached because…", curated/amendment badges), and a corpus-scope banner ("IS 875-3:1987 with Amd 1–3").
 3. **Amendment test plan (agreed):** (a) a deterministic check that each original provision in the results brings its amendment along; (b) amendment-sensitive gold questions, scored on the amended value: Table 28 φ=0.2 → **1.8**; Cl. 6.2.2.8 open cylinder → **−0.8 / −0.5**; Cl. 5.5 → **refer to IS 15498:2004** (not ×1.15); Cl. 7.1 → **"satisfies… or"**; Table 1 third class → **+ "permanent walls"** (Amd 3); (c) an ablation `expand=False` vs `expand=True`. If the 3B model ignores the amendment notes: strengthen the prompt first, then consider annotating the data, and document it honestly.
-4. Draft the ~36 gold questions with gold `chunk_id`s and pages, for the user to verify; then build `eval/run.py`, the baselines (BM25 / dense / hybrid), and calibrate the low-confidence threshold.
-5. Fine-tuning: synthetic pairs + hard negatives → train on the GTX 1650 → both protocols → ablation → HF Hub.
-6. README, DECISIONS.md (decisions, trade-offs, limitations, scale path), clean-machine test.
+4. Draft the **~30 gold questions** (incl. 6–8 unanswerable) with gold `chunk_id`s and pages, for the user to verify, then **freeze** them. Build `eval/run.py` (counts + %, per-question wins/losses), the baselines (BM25 / dense / hybrid), and calibrate the low-confidence threshold. Include the 100 m, 450 m and 225 m-interpolation Table 2 questions.
+5. Fine-tuning: synthetic pairs from **qwen2.5:3b** (3–4 per chunk, hard filters incl. the gold-leak guard) → **checkpoint** (pass rate + read ~20 queries) → hard negatives → train on the GTX 1650 → transductive protocol → ablation. If there's no gain, or the queries are poor: **only then** consider Groq (the user decided not to set it up now), retrain, and report both. Then HF Hub. Strict split = future work. **Full fine-tuning brief (assumptions A1–A5 + checks, success rule) is in PLAN.md §3.**
+6. README, DECISIONS.md (decisions, trade-offs, limitations, **expected failure modes**, why the Hindi documents were skipped, scale path), clean-machine test.
 
 **Last commit:** `74f8585` "Parse the 3 PDFs into cited sections, add manually checked IS 875 tables and amendments, and build hybrid keyword + semantic search" (Phases 0–2). The generation code (`generate.py`, `pipeline.py`, `cite.py`) is in that commit but hasn't been run yet.
 
